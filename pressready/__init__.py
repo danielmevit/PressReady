@@ -1,5 +1,3 @@
-"""
-PressReady - PDF Imposition Tool
-"""
+"""PressReady v2 — Professional PDF Imposition Tool."""
 
-__version__ = "0.1.0"
+__version__ = "2.0.0"

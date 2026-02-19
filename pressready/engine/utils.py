@@ -1,113 +1,71 @@
-"""
-Utility functions for unit conversion and page range parsing.
-"""
+"""Unit conversions and page range parsing."""
 
 import re
 from typing import List
 
-# Conversion factor: 1 inch = 72 points, 1 inch = 25.4 mm
-PT_PER_MM = 72.0 / 25.4  # ~2.834645669
+PT_PER_MM = 72.0 / 25.4  # ~2.8346
 
 
 def mm_to_pt(mm: float) -> float:
-    """
-    Convert millimeters to PDF points.
-    
-    Args:
-        mm: Value in millimeters
-        
-    Returns:
-        Value in PDF points (1 point = 1/72 inch)
-    """
+    """Convert millimeters to PDF points."""
     return mm * PT_PER_MM
 
 
 def pt_to_mm(pt: float) -> float:
-    """
-    Convert PDF points to millimeters.
-    
-    Args:
-        pt: Value in PDF points
-        
-    Returns:
-        Value in millimeters
-    """
+    """Convert PDF points to millimeters."""
     return pt / PT_PER_MM
+
+
+def inch_to_pt(inch: float) -> float:
+    """Convert inches to PDF points."""
+    return inch * 72.0
 
 
 def parse_page_range(expr: str, total_pages: int) -> List[int]:
     """
-    Parse a page range expression into a list of 0-based page indices.
-    
-    Supports:
-    - Single pages: "1", "5"
-    - Ranges: "1-4", "10-15"
-    - Mixed: "1-4,7,10-12"
-    - Whitespace is ignored
-    
-    Args:
-        expr: Page range expression (1-based, e.g., "1-4,7,10-12")
-        total_pages: Total number of pages in the document
-        
-    Returns:
-        List of 0-based page indices
-        
-    Raises:
-        ValueError: If expression is invalid or pages are out of bounds
+    Parse a page range expression into 0-based page indices.
+
+    Supports: "1", "1-4", "1-4,7,10-12".  Whitespace is ignored.
+
+    Raises ValueError on bad input.
     """
     if total_pages < 1:
         raise ValueError(f"total_pages must be >= 1, got {total_pages}")
-    
-    # Remove all whitespace
-    expr = re.sub(r'\s+', '', expr)
-    
+
+    expr = re.sub(r"\s+", "", expr)
     if not expr:
         raise ValueError("Page range expression cannot be empty")
-    
-    result = []
-    parts = expr.split(',')
-    
-    for part in parts:
+
+    result: List[int] = []
+    for part in expr.split(","):
         if not part:
             continue
-            
-        if '-' in part:
-            # Range: "1-4"
-            range_parts = part.split('-')
-            if len(range_parts) != 2:
-                raise ValueError(f"Invalid range format: '{part}'")
-            
+        if "-" in part:
+            pieces = part.split("-")
+            if len(pieces) != 2:
+                raise ValueError(f"Invalid range: '{part}'")
             try:
-                start = int(range_parts[0])
-                end = int(range_parts[1])
+                start, end = int(pieces[0]), int(pieces[1])
             except ValueError:
                 raise ValueError(f"Invalid page numbers in range: '{part}'")
-            
             if start < 1:
                 raise ValueError(f"Page number must be >= 1, got {start}")
             if end > total_pages:
-                raise ValueError(f"Page {end} exceeds document length ({total_pages} pages)")
+                raise ValueError(f"Page {end} exceeds document ({total_pages} pages)")
             if start > end:
-                raise ValueError(f"Invalid range: start ({start}) > end ({end})")
-            
-            # Convert to 0-based indices
+                raise ValueError(f"Invalid range: {start} > {end}")
             result.extend(range(start - 1, end))
         else:
-            # Single page: "7"
             try:
                 page = int(part)
             except ValueError:
                 raise ValueError(f"Invalid page number: '{part}'")
-            
             if page < 1:
                 raise ValueError(f"Page number must be >= 1, got {page}")
             if page > total_pages:
-                raise ValueError(f"Page {page} exceeds document length ({total_pages} pages)")
-            
-            # Convert to 0-based index
+                raise ValueError(f"Page {page} exceeds document ({total_pages} pages)")
             result.append(page - 1)
-    
+
     if not result:
         raise ValueError("No valid pages in expression")
-    
     return result

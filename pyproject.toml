@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pressready"
-version = "0.6.0"
-description = "PDF Imposition Tool - N-Up and Booklet layouts with WYSIWYG preview"
+version = "2.0.0"
+description = "Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
