@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  IgnorableNamespaces="uap rescap desktop">
+
+  <Identity
+    Name="PressReadyTeam.PressReady"
+    Version="2.0.0.0"
+    Publisher="CN=PressReadyTeam"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>PressReady</DisplayName>
+    <PublisherDisplayName>PressReady Team</PublisherDisplayName>
+    <Logo>assets\icons\msix\StoreLogo.png</Logo>
+    <Description>Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="PressReady"
+      Executable="PressReady.exe"
+      EntryPoint="Windows.FullTrustApplication">
+
+      <uap:VisualElements
+        DisplayName="PressReady"
+        Description="Professional PDF Imposition Tool"
+        BackgroundColor="#1e1e1e"
+        Square150x150Logo="assets\icons\msix\Square150x150Logo.png"
+        Square44x44Logo="assets\icons\msix\Square44x44Logo.png" />
+
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="pdf">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.pdf</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>PDF Document</uap:DisplayName>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+</Package>

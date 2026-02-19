@@ -1,0 +1,36 @@
+# Changelog
+
+All notable changes to PressReady are documented here.
+
+---
+
+## [2.0.0] — 2026-02-19
+
+### Installers
+
+- **MSIX installer** — Native Windows packaging via `build_msix.ps1`. Produces `PressReady_2.0.0.msix` in `installer_output/`. Double-click to install; integrates with Start Menu, Settings → Apps, and Add/Remove Programs.
+- **Portable ZIP** — Produced alongside MSIX as `PressReady_2.0.0-windows-x64.zip`. Extract and run `PressReady.exe` with no installation. Suitable for USB drives, portable use, or restricted environments.
+- Removed Inno Setup and any third-party installer dependencies. MSIX uses only the free Windows 10 SDK (`makeappx.exe`, `signtool.exe`).
+
+### Build Pipeline
+
+- **PyInstaller** — One-dir bundle with `PressReady.spec`. Includes PyQt6, PyMuPDF, and app icons.
+- **build_msix.ps1** — Single script to build both MSIX and portable ZIP. Auto-creates self-signed certificate on first run.
+- **AppxManifest.xml** — MSIX manifest with app identity, icons, and runFullTrust capability.
+- **assets/icons/msix/** — MSIX tile icons (Square44, Square150, StoreLogo).
+
+### Code
+
+- **pressready/ui/main_window.py** — `_app_icon()` now handles PyInstaller frozen mode via `sys._MEIPASS` for correct icon resolution in bundled builds.
+
+### Project Structure
+
+- Added: `AppxManifest.xml`, `build_msix.ps1`, `CHANGELOG.md`, `assets/icons/msix/`
+- Build output: `installer_output/` (MSIX + ZIP), `dist/`, `build/`, `msix_stage/` (gitignored)
+- Signing certs: `certs/` (gitignored)
+
+---
+
+## [1.x] — Archived
+
+Original v1 code is in `_legacy/v1/`. See README for v2 feature list.

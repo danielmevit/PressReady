@@ -3,8 +3,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.egg-info/
-dist/
-build/
 *.egg
 
 # Virtual environment
@@ -25,6 +23,17 @@ Thumbs.db
 
 # pytest
 .pytest_cache/
+
+# PyInstaller / build
+build/
+dist/
+msix_stage/
+
+# MSIX build output
+installer_output/
+
+# Signing certificates (private keys)
+certs/
 
 # Temp files
 *.tmp

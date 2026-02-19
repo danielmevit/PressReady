@@ -10,6 +10,17 @@ Built with **Python 3.10+**, **PyQt6**, and **PyMuPDF (fitz)**.
 
 ---
 
+## Installers
+
+| Format | File | Use case |
+|--------|------|----------|
+| **MSIX** | `PressReady_2.0.0.msix` | Standard Windows installer — double-click to install. Integrates with Start Menu, Settings → Apps, and Add/Remove Programs. Clean install/uninstall. |
+| **Portable ZIP** | `PressReady_2.0.0-windows-x64.zip` | Extract anywhere and run `PressReady.exe`. No installation required. Ideal for USB drives, portable use, or environments where you can't install apps. |
+
+Both are produced by `build_msix.ps1` and placed in `installer_output/`.
+
+---
+
 ## Architecture: 4-Tab Model
 
 The UI mirrors the proven 4-tab workflow used by professional imposition tools:
@@ -147,9 +158,17 @@ PressReady/
 │       ├── sheet_tab.py           # Sheet tab UI
 │       ├── marks_tab.py           # Marks tab UI
 │       └── preview_panel.py       # Multi-sheet scrollable preview canvas
+├── assets/icons/                  # App icons (PNG + ICO + msix/)
 ├── tests/
 ├── _legacy/v1/                    # Original v1 code (archived)
+├── PressReady.spec                # PyInstaller build spec
+├── AppxManifest.xml               # MSIX package manifest
+├── build_msix.ps1                 # Builds .msix + portable .zip
 ├── pyproject.toml
+├── CHANGELOG.md                   # Release notes
+├── installer_output/              # Built installers (gitignored)
+│   ├── PressReady_2.0.0.msix     # MSIX installer
+│   └── PressReady_2.0.0-windows-x64.zip  # Portable
 └── README.md                      ← you are here
 ```
 
@@ -160,6 +179,70 @@ cd "D:\Vibe Coding\PressReady"
 pip install PyQt6 PyMuPDF
 python -m pressready
 ```
+
+## Building the Windows Installer (MSIX)
+
+The build pipeline uses **PyInstaller** to bundle the app, then **Windows SDK** tools
+to create a native **MSIX** package — the standard Windows installer format.
+No third-party installer tools are needed.
+
+### Prerequisites
+
+- Python 3.10+ with `PyQt6` and `PyMuPDF` installed
+- [PyInstaller](https://pyinstaller.org/) — `pip install pyinstaller`
+- Windows 10 SDK — `winget install Microsoft.WindowsSDK.10.0.26100` (free, provides `makeappx.exe` and `signtool.exe`)
+
+### One-command build
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build_msix.ps1
+```
+
+This runs all five steps automatically:
+1. **PyInstaller** bundles the app into `dist/PressReady/`
+2. Creates a **self-signed certificate** (first run only, stored in `certs/`)
+3. Stages the MSIX contents (exe + manifest + icons)
+4. Packages and signs → `installer_output/PressReady_2.0.0.msix`
+5. Creates portable ZIP → `installer_output/PressReady_2.0.0-windows-x64.zip`
+
+Use `-SkipPyInstaller` to skip step 1 if you already have a fresh build in `dist/`.
+
+### First-time certificate trust (one-time, requires admin)
+
+Before the MSIX can be installed, the signing certificate must be trusted.
+Run this **once** in an elevated PowerShell:
+
+```powershell
+Import-Certificate -FilePath "certs\PressReady.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+```
+
+### Installing the MSIX
+
+Double-click `PressReady_2.0.0.msix` to install via the standard Windows UI, or:
+
+```powershell
+Add-AppxPackage -Path installer_output\PressReady_2.0.0.msix
+```
+
+The installed app:
+- Appears in the **Start Menu** and Windows Search
+- Shows in **Settings → Apps** with a proper uninstall option
+- Registers as a handler for `.pdf` files
+- Updates cleanly when you rebuild with a higher version number
+
+### Uninstalling
+
+```powershell
+Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage
+```
+
+Or just right-click the app in the Start Menu → Uninstall.
+
+### Portable ZIP
+
+Extract `PressReady_2.0.0-windows-x64.zip` to any folder and run `PressReady.exe`. No installation required. Works from USB drives, network shares, or local folders.
+
+---
 
 ## Design Decisions
 

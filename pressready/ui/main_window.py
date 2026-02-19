@@ -405,8 +405,11 @@ class _SettingsDialog(QDialog):
 
 
 def _app_icon() -> QIcon:
-    import pathlib
-    base = pathlib.Path(__file__).resolve().parent.parent.parent / "assets" / "icons"
+    import sys, pathlib
+    if getattr(sys, "frozen", False):
+        base = pathlib.Path(sys._MEIPASS) / "assets" / "icons"
+    else:
+        base = pathlib.Path(__file__).resolve().parent.parent.parent / "assets" / "icons"
     icon = QIcon()
     for sz in (16, 24, 32, 48, 64, 128, 256):
         p = base / f"icon_{sz}x{sz}.png"
