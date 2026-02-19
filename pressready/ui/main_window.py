@@ -404,10 +404,22 @@ class _SettingsDialog(QDialog):
 # ── main window ──────────────────────────────────────
 
 
+def _app_icon() -> QIcon:
+    import pathlib
+    base = pathlib.Path(__file__).resolve().parent.parent.parent / "assets" / "icons"
+    icon = QIcon()
+    for sz in (16, 24, 32, 48, 64, 128, 256):
+        p = base / f"icon_{sz}x{sz}.png"
+        if p.exists():
+            icon.addPixmap(QPixmap(str(p)))
+    return icon
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setStyleSheet(_DARK_STYLE)
+        self.setWindowIcon(_app_icon())
         self._update_title()
         self.setMinimumSize(1100, 750)
         self.resize(1440, 900)

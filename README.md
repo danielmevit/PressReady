@@ -97,6 +97,20 @@ The UI mirrors the proven 4-tab workflow used by professional imposition tools:
 - View overlay toggles (page tops/numbers/frames/previews) now work across
   all sheets in the multi-sheet canvas.
 
+### Session 4 — 2026-02-19 (continued)
+
+**What was done:**
+- **App icon** — designed custom PressReady logo (orange PR monogram with rounded
+  corners). Converted from 1024×1024 source to all standard sizes (16, 24, 32, 48,
+  64, 128, 256) plus a multi-size `pressready.ico` for installer use.
+  Stored in `assets/icons/`.
+- Icon wired into the app via `setWindowIcon` on both `QApplication` and `QMainWindow`.
+  Windows taskbar grouping set via `SetCurrentProcessExplicitAppUserModelID`.
+- **Repo restructured** — `v2/` promoted to project root as the main application.
+  Original v1 code archived to `_legacy/v1/`. GitHub repo updated.
+- **Accent color darkened** from `#E8912D` to `#D07B24` with adjusted hover/pressed
+  states (`#BC6F20` / `#A8631C`) across all UI elements.
+
 **Not yet implemented (planned):**
 - [ ] Preprocessors: Clone Pages, N+1 Pages, Split Pages, Shuffle, Override Box, Setup Bleeds, Center & Crop, Slice, Script
 - [ ] Layout: Work-and-Turn, Work-and-Tumble, Perfect Bound modes
