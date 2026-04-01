@@ -1,6 +1,6 @@
 # PressReady v2
 
-**PressReady** is a Windows desktop app for **PDF imposition** — laying out source pages on press sheets for commercial printing. Version 2 is written in **Python 3.10+** with **PyQt6** and **PyMuPDF (fitz)**. The earlier codebase lives in `_legacy/v1/`.
+**PressReady** is a Windows desktop app for **PDF imposition** — laying out source pages on press sheets for commercial printing. Version 2 is written in **Python 3.10+** with **PyQt6** and **PyMuPDF (fitz)**. 
 
 ---
 
