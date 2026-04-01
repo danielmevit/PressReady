@@ -4,6 +4,14 @@ All notable changes to PressReady are documented here.
 
 ---
 
+## [Unreleased]
+
+### Licensing
+
+- Project relicensed under **GNU Affero General Public License v3.0 only (AGPL-3.0-only)**. Added `LICENSE`, `LICENSING.md`, and `NOTICE`; updated `README.md` and `pyproject.toml`.
+
+---
+
 ## [2.0.0] — 2026-02-19
 
 ### Installers

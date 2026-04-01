@@ -8,9 +8,12 @@ version = "2.0.0"
 description = "Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = {file = "LICENSE"}
 authors = [
-    {name = "PressReady Team"}
+    {name = "Daniel Mevit"}
+]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3 (AGPLv3)",
 ]
 dependencies = [
     "PyQt6>=6.4.0",

@@ -44,6 +44,10 @@ Work is grouped into four tabs:
 
 Details for this release: [CHANGELOG.md](CHANGELOG.md).
 
+## License
+
+**GNU Affero General Public License v3.0 (AGPL-3.0-only).** See [`LICENSE`](LICENSE), [`LICENSING.md`](LICENSING.md), and [`NOTICE`](NOTICE).
+
 ### Roadmap
 
 - More preprocessors (e.g. duplicate/split pages, bleeds, crop/center, scripting)  
@@ -70,6 +74,9 @@ PressReady/
 ├── build_msix.ps1
 ├── pyproject.toml
 ├── CHANGELOG.md
+├── LICENSE                  # GNU AGPL v3.0
+├── LICENSING.md
+├── NOTICE
 ├── installer_output/        # Build output (not in git)
 └── README.md
 ```

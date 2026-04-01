@@ -1,0 +1,8 @@
+PressReady — PDF imposition application
+Copyright (C) 2026 Daniel Mevit
+
+This product is licensed under the GNU Affero General Public License v3.0.
+See the LICENSE file for the full license text.
+
+Third-party libraries (for example PyQt6, PyMuPDF) retain their respective licenses;
+see package metadata and upstream notices.
