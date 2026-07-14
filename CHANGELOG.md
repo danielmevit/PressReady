@@ -6,11 +6,24 @@ All notable changes to PressReady are documented here.
 
 ## [Unreleased]
 
+### Planning (2026-07-14)
+
+- **Reference study** — `docs/ai/REFERENCE_STUDY.md`: Imposition Wizard 3 (installed build:
+  feature and domain model; its tab list is where PressReady's four tabs and unimplemented enums
+  came from) and Toolcraft (`@pixel-point/toolcraft`: schema-driven control panel, layout laws,
+  dark token system). No code from either was copied.
+- **`ROADMAP.md`** — six phases from a full code review: ground-truth bench harness → box-aware
+  imposition → schema-driven panel with an engine capability contract → Toolcraft-style UI →
+  the promised layout depth → marks/units/preflight. Absorbs the earlier `TODO.md`, which is
+  removed so there is one work list.
+- **DECISIONS** — keep PyQt6/PyMuPDF and port Toolcraft's design language rather than its stack;
+  a control the engine doesn't honour must not exist in the UI; IW is a domain reference, not a
+  feature target; brand accent stays orange.
+
 ### Project organization (2026-07-14)
 
 - Adopted the AI-project standard (`_refs/ai-project-setup-playbook.md`): added `AGENTS.md`
-  router and `docs/ai/` (START_HERE, DECISIONS, GOTCHAS, DESIGN_SYSTEM), plus `TODO.md`
-  with prioritized findings from a full code review.
+  router and `docs/ai/` (START_HERE, DECISIONS, GOTCHAS, DESIGN_SYSTEM).
 - **CodeGraph**: indexed the repo (`.codegraph/` gitignored, per-machine); `codegraph.json`
   excludes `_legacy/`, `framer-demo/`, `pressready-voice/`.
 - **Git model**: work now happens on `dev`; `main` is releases only.

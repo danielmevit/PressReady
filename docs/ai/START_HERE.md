@@ -6,12 +6,15 @@ press sheets for commercial printing). Python 3.10+, PyQt6 UI, PyMuPDF (fitz) en
 v2.0.0 shipped 2026-02-19 (MSIX + portable ZIP). License: AGPL-3.0-only.
 
 ## Current priority
-Work through **TODO.md**, top to bottom. The two big items:
-1. **Close the UI ↔ engine gap** — the Layout tab exposes booklet modes, right-to-left,
-   fillers, signatures, and page creep that the engine silently ignores. For a prepress
-   tool, silently wrong output is the worst failure mode.
-2. **Engine test suite** — `tests/` is empty. The engine is Qt-free and fully testable
-   headless (see TODO.md for the invariant list).
+**`ROADMAP.md` — start at Phase 1 (Ground truth).** The plan is grounded in a study of
+Imposition Wizard 3 and Toolcraft (`docs/ai/REFERENCE_STUDY.md`); read the roadmap's
+one-paragraph summary before touching engine code — it explains why the test harness comes
+before every other improvement.
+
+The short version of what's wrong: nothing verifies the output, the UI promises features the
+engine ignores (booklet modes, creep, signatures, 9 of 12 preprocessors), and imposition uses
+the source MediaBox rather than its TrimBox. See `GOTCHAS.md` before trusting `data_model.py`
+as a spec — `engine/impose.py` is the truth.
 
 ## How to run
 - **App (Windows Python, not WSL):** `pip install PyQt6 PyMuPDF` then `python -m pressready`
@@ -24,6 +27,7 @@ Work through **TODO.md**, top to bottom. The two big items:
 - Everything else structural: ask CodeGraph (`codegraph explore "..."`), don't crawl.
 
 ## Links
-- Recent work → `CHANGELOG.md` · Task queue → `TODO.md`
+- The plan → `ROADMAP.md` · Recent work → `CHANGELOG.md`
 - Why it's built this way → `docs/ai/DECISIONS.md`
+- What the references taught us → `docs/ai/REFERENCE_STUDY.md`
 - Traps → `docs/ai/GOTCHAS.md` · Theme/styling → `docs/ai/DESIGN_SYSTEM.md`

@@ -18,6 +18,10 @@
 | DESIGN_SYSTEM.md | Dark theme tokens, styling rules, overlay colors |
 | DECISIONS.md | Durable "why" choices |
 | GOTCHAS.md | Build/run/deploy traps, known bugs |
+| REFERENCE_STUDY.md | What Imposition Wizard 3 and Toolcraft taught us (grounds the roadmap) |
+
+Plan and priorities live in `ROADMAP.md` (done / phases / backlog / not-doing) — the single
+work list. Don't start a second one.
 
 ## Workflow
 - Plan → implement → run → summarize in one go. Milestone-sized steps.
@@ -33,4 +37,6 @@
 ## Documentation upkeep
 - CHANGELOG.md = what shipped (the session log; don't make a second one).
 - Update DECISIONS.md on a durable choice; GOTCHAS.md when a trap is discovered.
-- Keep START_HERE's "current priority" in sync with TODO.md.
+- Keep START_HERE's "current priority" in sync with ROADMAP.md.
+- DESIGN_SYSTEM.md describes the theme that **exists**, not the one that's planned — update it
+  when a phase lands, never ahead of it.
