@@ -6,6 +6,33 @@ All notable changes to PressReady are documented here.
 
 ## [Unreleased]
 
+### Phase 2 — Box-aware imposition (2026-07-14)
+
+**The headline fix.** v2.0.0 called `show_pdf_page` without a clip, so every page was imposed on
+its **MediaBox**. Press-ready PDFs — the files this tool exists for — describe the finished page
+with a **TrimBox** and paint artwork past it to a **BleedBox**. For those, PressReady placed the
+wrong area, and printed crop marks around the wrong edge, without saying a word.
+
+- **Source box selection** — Media / Crop / Trim / Bleed, defaulting to **Trim**. PDF defines
+  TrimBox to fall back to CropBox and then MediaBox, so the new default is also correct for plain
+  PDFs that carry no box information (asserted by a test).
+- **Bleed** — `bleed_mm` pulls artwork beyond the chosen box and lets it spill outside the cell, so
+  a slightly-off cut still lands on ink. The page does not move when bleed is added.
+- **Crop marks now follow the trim rect, not the cell.** A page whose proportions differ from its
+  cell is letterboxed inside it; marks drawn on the cell sat off the page edge entirely. Found while
+  reasoning about boxes and fixed here.
+- **Anything outside the chosen box is clipped**, so a slug mark in the media margin no longer
+  reaches the press sheet.
+
+**Architecture**
+- New `engine/geometry.py` — one home for sheet/cell/box/fit maths and for `sheet_plan()`, which
+  decides which page goes in which cell of which sheet. `impose.py` now only renders that plan.
+- **The preview can no longer drift from the output.** It used to re-derive cell geometry from the
+  project while displaying a separately-imposed PDF: two opinions about one layout. `impose_to_temp`
+  now returns an `ImposeResult` carrying the geometry the run actually used, and the overlay
+  describes *that*. Deleted `compute_cells()` and its duplicate maths.
+- `LayoutSettings` gained `rows`/`cols` (groundwork for arbitrary N-Up grids).
+
 ### Phase 1 — Ground truth (2026-07-14)
 
 **Tests** — `tests/` went from empty to 96 tests. The centrepiece is a round-trip bench harness

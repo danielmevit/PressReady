@@ -18,9 +18,8 @@ from PyQt6.QtGui import QPixmap, QImage, QFont, QPainter, QPen, QColor
 
 import fitz
 
-from pressready.engine.data_model import Project, LayoutType
-from pressready.engine.utils import mm_to_pt, parse_page_range
-from pressready.engine.impose import impose_to_temp, booklet_page_order
+from pressready.engine.data_model import Project
+from pressready.engine.impose import ImposeResult, impose_to_temp
 
 MAGENTA = QColor(255, 0, 144)
 
@@ -37,67 +36,21 @@ class CellInfo:
     page_num: int  # 1-based, 0 = blank
 
 
-def compute_cells(project: Project, sheet_idx: int) -> List[CellInfo]:
-    if not project.source_pdf_path:
+def cells_from_result(result: ImposeResult, sheet_idx: int) -> List[CellInfo]:
+    """
+    Overlay geometry for one sheet, taken from the imposition that drew it.
+
+    The preview used to re-derive cell maths from the project, which meant the
+    magenta overlay was a second opinion that could disagree with the printed
+    result. It now describes the run whose output is on screen: the rects are the
+    trim rects the engine actually placed, so what's outlined is what gets cut.
+    """
+    if sheet_idx >= len(result.placed):
         return []
-    try:
-        doc = fitz.open(project.source_pdf_path)
-        total = len(doc)
-        doc.close()
-    except Exception:
-        return []
-
-    expr = project.layout.page_range.strip()
-    try:
-        page_indices = parse_page_range(expr, total) if expr else list(range(total))
-    except ValueError:
-        page_indices = list(range(total))
-
-    num_src = len(page_indices)
-    if num_src == 0:
-        return []
-
-    w_mm, h_mm = project.sheet.sheet_size_mm()
-    sw, sh = mm_to_pt(w_mm), mm_to_pt(h_mm)
-    s = project.sheet
-    ml, mr = mm_to_pt(s.margin_left_mm), mm_to_pt(s.margin_right_mm)
-    mt, mb = mm_to_pt(s.margin_top_mm), mm_to_pt(s.margin_bottom_mm)
-    lay = project.layout
-
-    if lay.layout_type == LayoutType.BOOKLET:
-        gh = mm_to_pt(lay.gutter_h_mm)
-        cw = (sw - ml - mr - gh) / 2
-        ch = sh - mt - mb
-        order = booklet_page_order(num_src)
-        if sheet_idx >= len(order):
-            return []
-        lp, rp = order[sheet_idx]
-        return [
-            CellInfo(ml, mt, ml + cw, mt + ch,
-                     (page_indices[lp] + 1) if lp >= 0 else 0),
-            CellInfo(ml + cw + gh, mt, ml + 2 * cw + gh, mt + ch,
-                     (page_indices[rp] + 1) if rp >= 0 else 0),
-        ]
-
-    nup = lay.nup
-    cols = 2
-    rows = 1 if nup == 2 else 2
-    gh = mm_to_pt(lay.gutter_h_mm)
-    gv = mm_to_pt(lay.gutter_v_mm)
-    cw = (sw - ml - mr - (cols - 1) * gh) / cols
-    ch = (sh - mt - mb - (rows - 1) * gv) / rows
-
-    cells = []
-    for ci in range(nup):
-        idx = sheet_idx * nup + ci
-        if idx >= num_src:
-            break
-        col = ci % cols
-        row = ci // cols
-        x0 = ml + col * (cw + gh)
-        y0 = mt + row * (ch + gv)
-        cells.append(CellInfo(x0, y0, x0 + cw, y0 + ch, page_indices[idx] + 1))
-    return cells
+    return [
+        CellInfo(p.trim.x0, p.trim.y0, p.trim.x1, p.trim.y1, p.page_number)
+        for p in result.placed[sheet_idx]
+    ]
 
 
 def draw_overlays(
@@ -166,7 +119,7 @@ class _RenderWorker(QThread):
         self._cancel = False
         tmp_path = None
         try:
-            tmp_path, _ = impose_to_temp(self.project)
+            tmp_path, result = impose_to_temp(self.project)
             doc = fitz.open(tmp_path)
             total = len(doc)
             mat = fitz.Matrix(self.dpi / 72.0, self.dpi / 72.0)
@@ -182,7 +135,7 @@ class _RenderWorker(QThread):
                 img = QImage(pix.samples, pix.width, pix.height, pix.stride,
                              QImage.Format.Format_RGB888)
                 pm = QPixmap.fromImage(img)
-                cells = compute_cells(self.project, i)
+                cells = cells_from_result(result, i)
                 pm = draw_overlays(pm, cells, scale,
                                    self.show_tops, self.show_numbers,
                                    self.show_frames, self.show_previews)

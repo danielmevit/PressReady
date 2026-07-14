@@ -26,6 +26,35 @@ SHEET_PRESETS_MM = {
 
 
 # ──────────────────────────────────────────────
+#  Source pages
+# ──────────────────────────────────────────────
+
+class SourceBox(Enum):
+    """Which box of a source page gets imposed."""
+    MEDIA = "Media Box"
+    CROP = "Crop Box"
+    TRIM = "Trim Box"
+    BLEED = "Bleed Box"
+
+
+@dataclass
+class SourceSettings:
+    """
+    How to read the incoming pages.
+
+    ``box`` is the area fitted to each cell — the TrimBox by default, because that
+    is the finished page a press-ready PDF describes. PDF defines TrimBox to fall
+    back to the CropBox and then the MediaBox, so this is also correct for plain
+    PDFs that carry no boxes at all.
+
+    ``bleed_mm`` pulls extra artwork beyond that box and lets it spill outside the
+    cell, so an imprecise cut still lands on ink.
+    """
+    box: SourceBox = SourceBox.TRIM
+    bleed_mm: float = 0.0
+
+
+# ──────────────────────────────────────────────
 #  Preprocessors
 # ──────────────────────────────────────────────
 
@@ -96,8 +125,10 @@ class CreepMode(Enum):
 class LayoutSettings:
     layout_type: LayoutType = LayoutType.NUP
 
-    # N-Up
+    # N-Up. rows/cols override nup when both are set.
     nup: int = 2  # 2, 4
+    rows: int = 0
+    cols: int = 0
 
     # Booklet
     booklet_type: BookletType = BookletType.TWO_UP
@@ -196,7 +227,8 @@ class MarkItem:
 
 @dataclass
 class Project:
-    """Top-level container holding all 4 tabs of settings."""
+    """Top-level container holding every setting the engine reads."""
+    source: SourceSettings = field(default_factory=SourceSettings)
     preprocessors: List[PreprocessorStep] = field(default_factory=list)
     layout: LayoutSettings = field(default_factory=LayoutSettings)
     sheet: SheetSettings = field(default_factory=SheetSettings)
