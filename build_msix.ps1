@@ -35,13 +35,21 @@ foreach ($tool in @($makeappx, $signtool)) {
 Write-Host "[OK] SDK tools: $sdk" -ForegroundColor Green
 
 # ── config ───────────────────────────────────────────
-$appVersion  = "2.0.0.0"
+# The version has one home: pressready/__init__.py. Read it rather than restate it,
+# so a release bump can't leave the installer claiming an older build.
+$initPy = Get-Content "$root\pressready\__init__.py" -Raw
+if ($initPy -notmatch '__version__\s*=\s*"([^"]+)"') {
+    Write-Error "Could not read __version__ from pressready/__init__.py"
+}
+$version     = $Matches[1]
+$appVersion  = "$version.0"          # MSIX requires a four-part version
 $pfxPath     = "$root\certs\PressReady.pfx"
 $pfxPassword = "PressReady2026"
 $cerPath     = "$root\certs\PressReady.cer"
 $stageDir    = "$root\msix_stage"
 $outDir      = "$root\installer_output"
-$msixPath    = "$outDir\PressReady_2.0.0.msix"
+$msixPath    = "$outDir\PressReady_$version.msix"
+Write-Host "[OK] Version $version (from pressready/__init__.py)" -ForegroundColor Green
 
 # ── Step 1: PyInstaller build ────────────────────────
 if (-not $SkipPyInstaller) {
@@ -89,7 +97,15 @@ New-Item -ItemType Directory -Path $stageDir | Out-Null
 
 Copy-Item "$root\dist\PressReady\PressReady.exe" "$stageDir\"
 Copy-Item "$root\dist\PressReady\_internal" "$stageDir\_internal" -Recurse
-Copy-Item "$root\AppxManifest.xml" "$stageDir\"
+# Stamp the version into the staged manifest. $appVersion used to be computed and then
+# never applied, so the MSIX took whatever the checked-in manifest said and bumping the
+# script did nothing at all.
+$manifest = Get-Content "$root\AppxManifest.xml" -Raw
+$manifest = [regex]::Replace($manifest, '(<Identity[^>]*?\sVersion=")[^"]+(")', "`${1}$appVersion`${2}")
+if ($manifest -notmatch [regex]::Escape($appVersion)) {
+    Write-Error "Could not stamp version $appVersion into AppxManifest.xml"
+}
+Set-Content -Path "$stageDir\AppxManifest.xml" -Value $manifest -Encoding UTF8
 New-Item -ItemType Directory -Path "$stageDir\assets\icons\msix" -Force | Out-Null
 Copy-Item "$root\assets\icons\msix\*" "$stageDir\assets\icons\msix\"
 
@@ -114,7 +130,7 @@ if (-not $SkipSign) {
 
 # ── Step 5: portable ZIP ─────────────────────────────
 Write-Host "`n=== Step 5/5: Portable ZIP ===" -ForegroundColor Cyan
-$zipPath = "$outDir\PressReady_2.0.0-windows-x64.zip"
+$zipPath = "$outDir\PressReady_$version-windows-x64.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath }
 
 $distDir = "$root\dist\PressReady"

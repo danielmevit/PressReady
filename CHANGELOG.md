@@ -140,8 +140,10 @@ saddle-stitch ordering, page-range parsing, margin containment, determinism, and
 - `python -m pressready --smoke` — headless end-to-end self-check (build a sample, impose it, verify
   the output, construct the real window offscreen, exit 0/1). Runs in WSL and in a frozen build.
 - Proper CLI entry point (`--version`, optional PDF argument).
-- Version single-sourced from `pressready/__init__.py`; `pyproject.toml` reads it dynamically and
-  the About dialog no longer hardcodes it.
+- Version single-sourced from `pressready/__init__.py`. `pyproject.toml` reads it dynamically, the
+  About dialog no longer hardcodes it, and `build_msix.ps1` reads it and **stamps it into the
+  staged manifest** — its `$appVersion` was previously computed and then never used, so the MSIX
+  silently took whatever the checked-in `AppxManifest.xml` said and bumping the script did nothing.
 
 ### Planning (2026-07-14)
 
