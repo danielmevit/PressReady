@@ -21,28 +21,41 @@ Work is grouped into four tabs:
 
 | Tab | Role |
 |-----|------|
-| **Preprocessors** | Page transforms before imposition (rotate, scale, reorder; more types planned). |
-| **Layout** | N-Up (e.g. 2/4-up), booklet (saddle-stitch), gutters, ranges — extended layouts on the roadmap. |
-| **Sheet** | Output sheet size (A4, A3, Letter, Tabloid, custom), margins, orientation. |
-| **Marks** | Crop, trim, registration, folding marks, labels, and related printer marks. |
+| **Source** | Which box of the incoming pages to impose (trim/bleed/crop/media), bleed, and page transforms. |
+| **Layout** | N-Up grids, booklets (saddle stitch or perfect bound), signatures, creep, gutters, page range. |
+| **Sheet** | Press sheet size (A5–A2, Letter, Legal, Tabloid, custom), margins, orientation. |
+| **Marks** | Crop, gap crop, trim, registration, folding, perforation, collating, colour bar, labels, custom PDF marks. |
+
+The settings panel is generated from a single declarative schema (`pressready/ui/schema.py`),
+and a control cannot exist unless the engine honours the setting behind it — the test suite
+fails otherwise. Settings that don't apply to the current mode are hidden rather than greyed
+out.
 
 ---
 
-## What works today (v2.0.0)
+## What works today
 
-- Four-tab UI: Preprocessors, Layout, Sheet, Marks  
-- Open PDF from a button or drag-and-drop  
-- Preprocessors: rotate, scale, reorder  
-- Layout: 2-up / 4-up, booklet (saddle-stitch, sheetwise), gutters, page range  
-- Sheet: presets, per-side margins, orientation  
-- Marks: crop, registration, trim, folding, text labels  
-- Multi-sheet preview grid, zoom, and overlay options  
-- PDF export in the background with a progress dialog  
-- Vector imposition via PyMuPDF (`show_pdf_page` — page content not rasterized)  
-- Menu bar (File, Edit, View, Help), recent files, in-app help (F1), dark theme with a consistent accent color  
-- Custom app icon and MSIX-ready assets  
+- **Box-aware imposition** — imposes the **trim box** by default, so a press-ready PDF places
+  its finished page, not its whole sheet. Bleed carries artwork past the cut line. Files with
+  no boxes are unaffected.
+- **Vector throughout** — pages are embedded via `show_pdf_page`, never rasterized, so output
+  quality always equals the source.
+- **Layout** — N-Up at 1/2/4/6/8/9/16-up or any rows × columns, auto-rotate to fit, booklets
+  (saddle stitch or perfect bound with signatures), creep compensation, right-to-left binding,
+  gutters, page ranges.
+- **Source transforms** — rotate, scale (a true photographic scale, boxes and all), reorder.
+- **Marks** — crop, gap crop, trim, registration, folding, perforation, collating, colour bar,
+  text labels, and **custom marks: any PDF stamped on the sheet** (bring your own bull's-eye).
+- **Preflight** — impossible margins, a missing trim box, bleed with no artwork behind it,
+  mixed page sizes, page counts that don't fold, unwanted scaling — reported while you can
+  still fix them, not at the press.
+- **Preview is the output** — sheets are rendered from a real imposition, and the magenta cut
+  lines come from that same run, so they cannot disagree with what prints.
+- **Units** — mm, cm, inches or points.
+- Undo/redo, per-section reset, presets (readable JSON), recent files, drag-and-drop,
+  background export with a working Cancel, in-app help (F1), preflight (F7).
 
-Details for this release: [CHANGELOG.md](CHANGELOG.md).
+Details: [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
@@ -52,11 +65,9 @@ Details for this release: [CHANGELOG.md](CHANGELOG.md).
 
 ### Roadmap
 
-- More preprocessors (e.g. duplicate/split pages, bleeds, crop/center, scripting)  
-- More layout modes (work-and-turn/tumble, perfect binding, denser N-Up, signatures, creep, RTL)  
-- More mark types (gap crop, perforation, color bars, barcode, plate names, custom marks)  
-- Duplex and per-sheet rotation in the UI  
-- Presets, undo/redo, full settings dialog, batch / hot folders  
+See [ROADMAP.md](ROADMAP.md). Next up: more preprocessors (clone, split, N+1, center/crop),
+step-and-repeat and cut-stack layouts, a CLI for batch work, and work-and-turn/tumble press
+forms (deliberately not guessed at — see the roadmap for why).
 
 ---
 
@@ -64,13 +75,14 @@ Details for this release: [CHANGELOG.md](CHANGELOG.md).
 
 ```
 PressReady/
-├── pressready/              # Application package
-│   ├── __main__.py          # Entry point
-│   ├── engine/              # Model, impose, marks, preprocessors
-│   └── ui/                  # Main window and tabs
+├── pressready/
+│   ├── __main__.py          # Entry point (--smoke, --version)
+│   ├── engine/              # Qt-free: model, geometry, impose, marks,
+│   │                        # preprocessors, preflight, capabilities
+│   └── ui/                  # schema, panel, components, theme, preview
 ├── assets/icons/
-├── tests/
-├── _legacy/v1/
+├── tests/                   # 230 tests, incl. a ground-truth bench harness
+├── docs/ai/                 # How to work in this repo (start: AGENTS.md)
 ├── PressReady.spec
 ├── AppxManifest.xml
 ├── build_msix.ps1
@@ -91,6 +103,15 @@ PressReady/
 cd PressReady
 pip install PyQt6 PyMuPDF
 python -m pressready
+
+python -m pressready --smoke   # headless end-to-end self-check, exits 0/1
+```
+
+Tests (the engine is Qt-free, so they run headless anywhere):
+
+```bash
+pip install -e ".[dev]"
+pytest
 ```
 
 ---
@@ -126,7 +147,14 @@ Portable build: unzip `PressReady_2.0.0-windows-x64.zip` and run `PressReady.exe
 
 ## Design notes
 
-1. **Engine vs UI** — The engine does not depend on Qt; a shared data model connects UI and logic.  
-2. **Vectors** — Imposition uses `show_pdf_page` so quality follows the source PDF.  
-3. **Preview** — Source pages render from the original file; sheet previews use a temporary imposed PDF; both use background threads.  
-4. **Preprocessors** — They output a temporary PDF that feeds the imposition step.  
+1. **Engine vs UI** — The engine imports no Qt; a shared dataclass model is the contract. That
+   is what makes the whole engine testable headless, and would let a CLI reuse it.
+2. **Vectors** — Imposition uses `show_pdf_page`, so quality follows the source PDF.
+3. **One geometry** — `engine/geometry.py` decides what goes where; `impose.py` only renders
+   that plan, and the preview annotates the result the engine hands back. There is no second
+   opinion about layout anywhere in the codebase.
+4. **The UI cannot promise what the engine ignores** — every setting is classified in
+   `engine/capabilities.py`, and adding one to the model fails the build until it is. This is
+   deliberate: v2.0.0 shipped a Layout tab whose booklet modes, signatures and creep the engine
+   silently discarded.
+5. **Millimetres in the model** — units are a display concern only, converted at the widget.

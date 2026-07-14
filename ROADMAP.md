@@ -5,24 +5,39 @@ read of the code on 2026-07-14. Phases are ordered so each one is verifiable bef
 starts (`_refs/ai-full-build-recipe.md` §4). Sizes: **S** ≈ a session, **M** ≈ a few, **L** ≈ a phase of its own.
 
 ## Done
-- **v2.0.0** (2026-02-19) — four-tab UI, N-Up 2/4, saddle-stitch booklet, 6 mark types, vector
-  imposition, multi-sheet preview, MSIX + portable ZIP.
-- **2026-07-14** — AGPL relicense; AI-project standard adopted (AGENTS.md, docs/ai/, CodeGraph,
-  `dev` branch); `framer-demo/node_modules` untracked.
+- **v2.0.0** (2026-02-19) — four-tab UI, N-Up 2/4, saddle-stitch booklet, 6 mark types,
+  vector imposition, multi-sheet preview, MSIX + portable ZIP.
+- **2026-07-14** — AGPL relicense; AI-project standard adopted (AGENTS.md, docs/ai/,
+  CodeGraph, `dev` branch); `framer-demo/node_modules` untracked.
+- **2026-07-14/15 — Phases 1–6 all landed.** See CHANGELOG.md. In short: a ground-truth
+  bench harness and 230 tests where there were none; box-aware imposition (v2 imposed the
+  MediaBox, so press-ready PDFs were placed wrong and marked wrong); a capability contract
+  that fails the build if the UI offers a setting the engine ignores; a schema-driven,
+  Toolcraft-styled panel with undo, presets and per-section reset; arbitrary N-Up grids,
+  auto-rotate, signatures, perfect binding, creep and RTL; units, four new mark types and
+  preflight. Engine order was 1 → 2 → 5 → 6 → 3 → 4: with everything shipping together the
+  old UI never reached anyone, so the schema was written once against a finished engine.
+
+## Not done from the original plan (deliberately)
+- **Work-and-turn / work-and-tumble.** Not orderings but press-form techniques: both forms
+  go on one double-size plate and the sheet is printed twice from it. Subtly wrong here
+  wastes plates and paper, and the semantics can't be validated without a pressman. Removed
+  from the model rather than left as controls that do nothing — which is the exact defect
+  this whole series exists to remove. Backlog, below.
 
 ---
 
-## The one-paragraph version
+## The one-paragraph version (as diagnosed 2026-07-14, now addressed)
 
-PressReady's engine is small, clean, and genuinely vector-true. Its problem isn't code quality —
-it's that **nothing verifies the output and the UI promises things the engine doesn't do**. The
-Layout tab collects booklet modes, right-to-left, fillers, signatures and page creep that
-`impose.py` silently drops on the floor; 9 of 12 preprocessors don't exist; and every placement
-uses the source MediaBox, so a real press-ready PDF (which carries a TrimBox and bleed) images
-the wrong area. For a prepress tool, silently-wrong output is the worst possible failure, and it
-is currently the *easiest* thing to produce. So: build the ground truth first (Phase 1), fix the
-box model (Phase 2), then make it structurally impossible for the UI to lie again (Phase 3) —
-which is the same edit that buys the Toolcraft-style UI (Phase 4), presets, and undo.
+PressReady's engine was small, clean, and genuinely vector-true. Its problem was never code
+quality — it was that **nothing verified the output and the UI promised things the engine
+didn't do**. The Layout tab collected booklet modes, right-to-left, fillers, signatures and
+page creep that `impose.py` silently dropped on the floor; 9 of 12 preprocessors didn't
+exist; and every placement used the source MediaBox, so a real press-ready PDF (which carries
+a TrimBox and bleed) imaged the wrong area. For a prepress tool, silently-wrong output is the
+worst possible failure, and it was the *easiest* thing to produce. All six phases below have
+landed; the guard that keeps it fixed is `engine/capabilities.py` plus its tests, which fail
+the build if a setting is added that the engine doesn't read.
 
 ---
 
