@@ -1,4 +1,4 @@
-"""PressReady v2 entry point.  Run with: python -m pressready"""
+"""PressReady entry point.  Run with: python -m pressready"""
 
 import argparse
 import os
@@ -33,7 +33,10 @@ def run_gui(pdf: str = "") -> int:
     from pressready.ui.main_window import MainWindow, app_icon
 
     if sys.platform == "win32":
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("pressready.v2")
+        # Matches the MSIX Identity Name, so the taskbar groups the packaged app and
+        # the portable build under one icon instead of two.
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "PressReadyTeam.PressReady")
 
     app = QApplication(sys.argv)
     theme.apply(app)

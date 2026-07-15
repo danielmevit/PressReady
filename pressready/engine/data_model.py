@@ -1,5 +1,5 @@
 """
-Data model for PressReady v2.
+Data model for PressReady.
 
 All settings for the 4-tab workflow: Preprocessors, Layout, Sheet, Marks.
 Used as the shared contract between engine and UI.

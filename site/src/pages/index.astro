@@ -1,5 +1,17 @@
 ---
-const version = "0.3.0";
+import fs from "node:fs";
+
+// The version has one home: pressready/__init__.py. Read it at build time rather
+// than restate it here, or the site will eventually advertise a version that isn't
+// the one on the releases page.
+const initPy = fs.readFileSync(
+  new URL("../../../pressready/__init__.py", import.meta.url),
+  "utf8",
+);
+const match = initPy.match(/__version__\s*=\s*"([^"]+)"/);
+if (!match) throw new Error("Could not read __version__ from pressready/__init__.py");
+const version = match[1];
+
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const title = "PressReady — free PDF imposition for print";
 const description =
