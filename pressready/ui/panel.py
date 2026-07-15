@@ -185,8 +185,15 @@ class ValueStore(QObject):
         self.changed.emit()
 
 
-def _build_control(control: Control, store: ValueStore) -> Optional[QWidget]:
-    """One schema entry → one bound widget."""
+def _build_control(control: Control, store: ValueStore):
+    """
+    One schema entry → (row to show, the bound widget).
+
+    The bound widget is handed back separately so the panel can push values *into*
+    it later. Undo, redo and loading a preset all change the store underneath the
+    widgets, and a control still showing the old value while the store holds the
+    new one is the panel lying about the job.
+    """
     value = store.get(control.target)
 
     if control.type is ControlType.SWITCH:
@@ -205,14 +212,13 @@ def _build_control(control: Control, store: ValueStore) -> Optional[QWidget]:
             widget.setToolTip(control.description)
         line.addWidget(caption, 1)
         line.addWidget(widget, 0, Qt.AlignmentFlag.AlignRight)
-        row.setProperty("boundWidget", widget)
-        return row
+        return row, widget
 
     if control.type is ControlType.SEGMENTED:
         widget = Segmented(list(control.options))
         widget.set_value(value)
         widget.changed.connect(lambda v, c=control: store.set(c.target, v))
-        return FieldRow(control.label, widget, control.description)
+        return FieldRow(control.label, widget, control.description), widget
 
     if control.type is ControlType.SELECT:
         widget = QComboBox()
@@ -223,7 +229,7 @@ def _build_control(control: Control, store: ValueStore) -> Optional[QWidget]:
             widget.setCurrentIndex(index)
         widget.currentIndexChanged.connect(
             lambda _, c=control, w=widget: store.set(c.target, w.currentData()))
-        return FieldRow(control.label, widget, control.description)
+        return FieldRow(control.label, widget, control.description), widget
 
     if control.type is ControlType.NUMBER:
         if is_length(control):
@@ -245,16 +251,16 @@ def _build_control(control: Control, store: ValueStore) -> Optional[QWidget]:
             widget.valueChanged.connect(lambda v, c=control: store.set(c.target, v))
         if control.suffix and not is_length(control):
             widget.setSuffix(control.suffix)
-        return FieldRow(control.label, widget, control.description)
+        return FieldRow(control.label, widget, control.description), widget
 
     if control.type is ControlType.TEXT:
         widget = QLineEdit(str(value or ""))
         if control.placeholder:
             widget.setPlaceholderText(control.placeholder)
         widget.textChanged.connect(lambda v, c=control: store.set(c.target, v))
-        return FieldRow(control.label, widget, control.description)
+        return FieldRow(control.label, widget, control.description), widget
 
-    return None  # collections are supplied by the caller
+    return None, None  # collections are supplied by the caller
 
 
 class SectionWidget(QWidget):
@@ -281,32 +287,60 @@ class SectionWidget(QWidget):
         body.setContentsMargins(t.SPACE_3, t.SECTION_TOP_PAD, t.SPACE_3, t.SECTION_BOTTOM_PAD)
         body.setSpacing(t.SPACE_3)
 
+        self._bound: Dict[str, QWidget] = {}
         for control in section.controls:
             if control.type is ControlType.COLLECTION:
-                widget = collection_factory(control) if collection_factory else None
+                row = collection_factory(control) if collection_factory else None
+                bound = None
             else:
-                widget = _build_control(control, store)
-            if widget is None:
+                row, bound = _build_control(control, store)
+            if row is None:
                 continue
-            body.addWidget(widget)
-            self._rows.append((control, widget))
+            body.addWidget(row)
+            self._rows.append((control, row))
+            if bound is not None:
+                self._bound[control.target] = bound
 
         column.addWidget(self._body)
         column.addWidget(divider())
         store.unit_changed.connect(self.apply_unit)
 
     def apply_unit(self, unit) -> None:
-        for _, widget in self._rows:
-            field = getattr(widget, "widget", None)
-            if isinstance(field, LengthSpin):
-                field.apply_unit(unit)
+        for widget in self._bound.values():
+            if isinstance(widget, LengthSpin):
+                widget.apply_unit(unit)
 
     def sync_from_store(self, values: dict) -> None:
-        """Push store values back into the widgets — after undo or a preset load."""
-        for control, widget in self._rows:
-            field = getattr(widget, "widget", None)
-            if isinstance(field, LengthSpin):
-                field.set_mm(float(values.get(control.target) or 0.0))
+        """
+        Push store values back into every widget — after undo, redo or a preset load.
+
+        All of them, not just the ones that are easy: this used to handle length
+        fields only, so undoing a change to the booklet type left the segmented
+        control showing the old choice while the store (and the preview, and the
+        exported PDF) had the new one.
+        """
+        for target, widget in self._bound.items():
+            if target not in values:
+                continue
+            value = values[target]
+            widget.blockSignals(True)
+            try:
+                if isinstance(widget, LengthSpin):
+                    widget.set_mm(float(value or 0.0))
+                elif isinstance(widget, Segmented):
+                    widget.set_value(value)
+                elif isinstance(widget, Switch):
+                    widget.setChecked(bool(value))
+                elif isinstance(widget, QComboBox):
+                    index = widget.findData(value)
+                    if index >= 0:
+                        widget.setCurrentIndex(index)
+                elif isinstance(widget, (QSpinBox, QDoubleSpinBox)):
+                    widget.setValue(value or 0)
+                elif isinstance(widget, QLineEdit):
+                    widget.setText(str(value or ""))
+            finally:
+                widget.blockSignals(False)
 
     def _set_expanded(self, expanded: bool) -> None:
         self._body.setVisible(expanded)

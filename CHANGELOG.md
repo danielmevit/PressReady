@@ -4,7 +4,54 @@ All notable changes to PressReady are documented here.
 
 ---
 
-## [Unreleased]
+## [0.3.0] — 2026-07-15
+
+Version restarted at **0.3.0** to match how the rest of these projects are numbered. The
+previous tag was v2.0.0; MSIX refuses to install an older version over a newer one, so anyone
+who has the v2.0.0 MSIX installed must remove it before installing 0.3.0.
+
+### Packaging — Windows, macOS, Linux
+
+- **Five artifacts, built by CI on every version tag** (`.github/workflows/release.yml`):
+  Windows x64 (MSIX + portable ZIP), Windows **32-bit** (portable — print shops keep old
+  machines), macOS **arm64 and Intel** (.dmg), and Linux x86_64 (portable tar.gz). PyInstaller
+  can't cross-compile, so each runs on its own runner. Every job runs the tests *and* `--smoke`
+  before packaging, and the Linux job smoke-tests the built bundle itself.
+- One cross-platform `PressReady.spec` (per-OS icon, macOS `.app` bundle, PDF file
+  association); `packaging/{windows,linux,macos}/` scripts replace `build_msix.ps1`.
+- Trimmed unused Qt modules (WebEngine, Quick, QML, Multimedia, …) out of the bundle.
+- **Linux build fix:** the launcher script was named `pressready` next to the `PressReady`
+  binary. On a case-insensitive filesystem — i.e. building from WSL against a Windows drive —
+  those are the same file, so the script overwrote the 100 MB binary and then exec'd itself
+  forever. CI would never have caught it (ext4 is case-sensitive). The launcher is gone, and
+  the build now fails loudly if the binary comes out suspiciously small.
+
+### The website
+
+- `site/` — an Astro page published to <https://danielmevit.github.io/pressready> by
+  `.github/workflows/deploy.yml`. **That workflow was replaced**: it uploaded the repository
+  root, which would have served the raw repo instead of a site.
+
+### Fixed
+
+- **The settings panel painted itself near-white.** `QScrollArea`'s viewport is a child widget,
+  so a `QScrollArea { background: transparent }` rule never reached it and it fell back to the
+  platform's light palette — putting near-white section titles on a near-white background,
+  unreadable. Fixed with a real dark `QPalette` plus viewport rules, so nothing depends on a
+  stylesheet reaching every widget.
+- **Undo, redo and preset loads only updated length fields.** Every other control — segmented,
+  select, switch, text — kept showing its old value while the store, the preview and the
+  exported PDF had the new one. All controls now follow the store, with a test that no control
+  can be added without being resyncable.
+- The mark editor's settings panel showed empty at startup and hid itself after choosing
+  artwork (a stray line absorbed into the wrong method).
+- Colours and fonts are read from `ui/theme.py` everywhere; the preview panel and the two
+  collection editors had hardcoded leftovers.
+- Bounded the preprocessor/mark lists and gave them empty states instead of a tall black box.
+
+### Docs
+
+- README rewritten in plain language — what it does, who it's for, what it can't do yet.
 
 ### Phase 6 — Marks, units, preflight (2026-07-15)
 

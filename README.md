@@ -1,160 +1,148 @@
-# PressReady v2
+# PressReady — put your pages on the press sheet
 
-**PressReady** is a Windows desktop app for **PDF imposition** — laying out source pages on press sheets for commercial printing. Version 2 is written in **Python 3.10+** with **PyQt6** and **PyMuPDF (fitz)**. 
+**PressReady lays PDF pages out on printing sheets.** Give it a document, tell it what you're
+printing on, and it arranges the pages so they come out right after they're printed, folded and
+cut. Two-up on A3, a saddle-stitched booklet, a sheet of labels — that job.
 
----
+It's free, open source, and runs on your own machine. Nothing is uploaded anywhere.
 
-## Installers
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-informational)](#install)
+[![Release](https://img.shields.io/github/v/release/danielmevit/pressready?display_name=tag&sort=semver)](https://github.com/danielmevit/pressready/releases)
 
-| Format | File | Notes |
-|--------|------|--------|
-| **MSIX** | `PressReady_2.0.0.msix` | Standard install: Start Menu, Settings → Apps, uninstall from the system. |
-| **Portable ZIP** | `PressReady_2.0.0-windows-x64.zip` | Run `PressReady.exe` after extract; no install. Handy for USB or locked-down machines. |
+![PressReady](assets/screenshot.png)
 
-Built by `build_msix.ps1` into `installer_output/`.
+- **Your pages stay sharp.** Pages are embedded as vectors, never turned into pictures. What
+  comes out is exactly as crisp as what went in.
+- **It reads print files properly.** If your PDF has a trim box and bleed — the way a
+  print-ready export does — PressReady uses them. Ordinary PDFs work fine too.
+- **The preview is the real thing.** The sheets on screen are rendered from an actual
+  imposition, and the pink outlines are the cut lines that run used. It can't show you one thing
+  and print another.
+- **It tells you before the press does.** Margins that don't fit, a missing trim box, pages
+  getting shrunk — you hear about it while you can still fix it.
 
----
+## Install
 
-## Interface
+**Windows** — download `PressReady-<version>-windows-x64.msix` from
+[Releases](https://github.com/danielmevit/pressready/releases) and double-click. Prefer nothing
+installed? Take the portable `.zip`, unzip it, run `PressReady.exe`. There's a 32-bit portable
+build for older machines.
 
-Work is grouped into four tabs:
+**macOS** — download the `.dmg`, drag it to Applications. First launch is right-click → Open (the
+app isn't code-signed yet).
 
-| Tab | Role |
-|-----|------|
-| **Source** | Which box of the incoming pages to impose (trim/bleed/crop/media), bleed, and page transforms. |
-| **Layout** | N-Up grids, booklets (saddle stitch or perfect bound), signatures, creep, gutters, page range. |
-| **Sheet** | Press sheet size (A5–A2, Letter, Legal, Tabloid, custom), margins, orientation. |
-| **Marks** | Crop, gap crop, trim, registration, folding, perforation, collating, colour bar, labels, custom PDF marks. |
+**Linux** — download the `.tar.gz`, extract, run `./pressready`. No Python or Qt needed.
 
-The settings panel is generated from a single declarative schema (`pressready/ui/schema.py`),
-and a control cannot exist unless the engine honours the setting behind it — the test suite
-fails otherwise. Settings that don't apply to the current mode are hidden rather than greyed
-out.
-
----
-
-## What works today
-
-- **Box-aware imposition** — imposes the **trim box** by default, so a press-ready PDF places
-  its finished page, not its whole sheet. Bleed carries artwork past the cut line. Files with
-  no boxes are unaffected.
-- **Vector throughout** — pages are embedded via `show_pdf_page`, never rasterized, so output
-  quality always equals the source.
-- **Layout** — N-Up at 1/2/4/6/8/9/16-up or any rows × columns, auto-rotate to fit, booklets
-  (saddle stitch or perfect bound with signatures), creep compensation, right-to-left binding,
-  gutters, page ranges.
-- **Source transforms** — rotate, scale (a true photographic scale, boxes and all), reorder.
-- **Marks** — crop, gap crop, trim, registration, folding, perforation, collating, colour bar,
-  text labels, and **custom marks: any PDF stamped on the sheet** (bring your own bull's-eye).
-- **Preflight** — impossible margins, a missing trim box, bleed with no artwork behind it,
-  mixed page sizes, page counts that don't fold, unwanted scaling — reported while you can
-  still fix them, not at the press.
-- **Preview is the output** — sheets are rendered from a real imposition, and the magenta cut
-  lines come from that same run, so they cannot disagree with what prints.
-- **Units** — mm, cm, inches or points.
-- Undo/redo, per-section reset, presets (readable JSON), recent files, drag-and-drop,
-  background export with a working Cancel, in-app help (F1), preflight (F7).
-
-Details: [CHANGELOG.md](CHANGELOG.md).
-
-## License
-
-**GNU Affero General Public License v3.0 (AGPL-3.0-only).** See [`LICENSE`](LICENSE), [`LICENSING.md`](LICENSING.md), and [`NOTICE`](NOTICE).
-
-**No warranty — use at your own risk.** The software is provided **“as is”** without warranty. You are responsible for verifying output (imposed PDFs, print readiness) before production use. The full disclaimer of warranty and limitation of liability is in [`LICENSE`](LICENSE) (AGPL sections 15–17). This README is not legal advice.
-
-### Roadmap
-
-See [ROADMAP.md](ROADMAP.md). Next up: more preprocessors (clone, split, N+1, center/crop),
-step-and-repeat and cut-stack layouts, a CLI for batch work, and work-and-turn/tumble press
-forms (deliberately not guessed at — see the roadmap for why).
-
----
-
-## Repository layout
-
-```
-PressReady/
-├── pressready/
-│   ├── __main__.py          # Entry point (--smoke, --version)
-│   ├── engine/              # Qt-free: model, geometry, impose, marks,
-│   │                        # preprocessors, preflight, capabilities
-│   └── ui/                  # schema, panel, components, theme, preview
-├── assets/icons/
-├── tests/                   # 230 tests, incl. a ground-truth bench harness
-├── docs/ai/                 # How to work in this repo (start: AGENTS.md)
-├── PressReady.spec
-├── AppxManifest.xml
-├── build_msix.ps1
-├── pyproject.toml
-├── CHANGELOG.md
-├── LICENSE                  # GNU AGPL v3.0
-├── LICENSING.md
-├── NOTICE
-├── installer_output/        # Build output (not in git)
-└── README.md
-```
-
----
-
-## Run from source
+**From source** — any platform:
 
 ```bash
-cd PressReady
-pip install PyQt6 PyMuPDF
+git clone https://github.com/danielmevit/pressready.git
+cd pressready
+pip install -e .
 python -m pressready
-
-python -m pressready --smoke   # headless end-to-end self-check, exits 0/1
 ```
 
-Tests (the engine is Qt-free, so they run headless anywhere):
+The Windows and macOS builds aren't signed, so you'll get a "publisher unknown" warning the first
+time. On Windows that's **More info → Run anyway**. Signing costs money and isn't there yet.
+
+## How it works
+
+1. Open a PDF — button, `Ctrl+O`, or drag it onto the window.
+2. Pick your sheet size and how many pages go on it.
+3. Look at the preview. That's your printed sheet.
+4. **Generate PDF** — send that to the printer.
+
+## What it does
+
+**Layouts**
+- **N-up** — 1, 2, 4, 6, 8, 9 or 16 pages per sheet, or set rows × columns yourself.
+- **Booklets** — saddle stitch (nested and stapled through the fold) or perfect binding
+  (signatures folded separately and glued). The page order is worked out for you.
+- **Creep** — folded booklets push out at the open edge and lose margin on the inner pages;
+  PressReady can shift the pages to compensate.
+- **Right-to-left** binding, blank-page placement, gutters, page ranges.
+- **Turn pages to fit** — landscape artwork on a portrait sheet, without editing the file.
+
+**Source pages**
+- Choose which box gets imposed — trim, bleed, crop or media.
+- Pull bleed past the cut line so a slightly-off cut still lands on ink.
+- Rotate, scale or reorder pages before they're laid out.
+
+**Marks**
+- Crop marks, gap crop marks (cuts that run right across the sheet), trim lines, registration
+  marks, fold marks, perforation marks, collating marks, a colour bar, and text labels.
+- **Custom marks** — point it at any PDF and it gets stamped on the sheet. Your own bull's-eye,
+  star target, or house colour bar.
+
+**Working with it**
+- Undo/redo, per-section reset, and presets you can save and reload for a repeat job.
+- Millimetres, centimetres, inches or points — your choice.
+- Preflight warnings before you export.
+
+## Requirements
+
+- Windows 10/11, macOS 11+, or a Linux desktop (X11 or Wayland)
+- Nothing else — the downloads include everything
+- Python 3.10+ only if you're running from source
+
+## FAQ
+
+**Does it upload my documents?** No. There's no network code in it at all. It opens your file,
+writes a new one, and that's the whole story.
+
+**Does it cost anything?** No, and there's no paid tier.
+
+**Will my pages lose quality?** No. They're embedded as vectors, not re-rendered. Text stays
+text.
+
+**My PDF has bleed. Does that work?** Yes — that's rather the point. PressReady imposes the trim
+box by default and can carry your bleed past the cut line. If your PDF has no boxes, it uses the
+whole page.
+
+**What's "creep"?** When you nest folded sheets inside each other, the inner pages stick out
+further at the open edge. Trimming the stack flush takes more off them, so their margins end up
+narrower. Creep compensation nudges the pages to even that out. On a thin booklet you can ignore
+it.
+
+**Can it do work-and-turn?** Not yet. That's a press technique where both forms go on one plate,
+and getting it subtly wrong wastes plates and paper — so it stays out until someone who runs a
+press has checked it. See [ROADMAP.md](ROADMAP.md).
+
+**Why a 32-bit Windows build?** Because print shops keep machines running for a long time.
+
+## Contributing
+
+Issues and pull requests are welcome. The repo has notes for anyone (or anything) working on it:
+start at [`AGENTS.md`](AGENTS.md), then [`docs/ai/START_HERE.md`](docs/ai/START_HERE.md).
+[`ROADMAP.md`](ROADMAP.md) is what's next; [`CHANGELOG.md`](CHANGELOG.md) is what happened.
 
 ```bash
 pip install -e ".[dev]"
-pytest
+pytest                          # 235 tests, no display needed
+python -m pressready --smoke    # end-to-end check, exits 0 or 1
 ```
+
+The engine (`pressready/engine/`) doesn't import Qt, so it's testable on its own — and every
+setting the UI offers has to be one the engine actually honours, or the test suite fails. That's
+deliberate; there's a story behind it in [`docs/ai/DECISIONS.md`](docs/ai/DECISIONS.md).
+
+## License
+
+[GNU AGPL-3.0](LICENSE) — free to use, study and modify. If you pass it on, or run a modified
+version as a network service, your version has to stay open under the same license and keep the
+attribution. © [Daniel Mevit](https://github.com/danielmevit).
+
+Made by **[damt.xyz](https://damt.xyz)** — freelance design & development.
+
+Provided "as is", without warranty. **Check your output before you commit a job to press.**
 
 ---
 
-## Build MSIX (Windows)
-
-Uses **PyInstaller** and the **Windows SDK** (`makeappx`, `signtool`).
-
-**Requirements:** Python 3.10+ with PyQt6 and PyMuPDF, PyInstaller, and a Windows 10 SDK (example: `winget install Microsoft.WindowsSDK.10.0.26100`).
-
-```powershell
-powershell -ExecutionPolicy Bypass -File build_msix.ps1
-```
-
-This bundles the app, creates or reuses a cert under `certs/`, builds a signed `installer_output/PressReady_2.0.0.msix`, and a portable zip. Use `-SkipPyInstaller` if `dist/PressReady/` is already up to date.
-
-**Trust the signing certificate once (elevated PowerShell):**
-
-```powershell
-Import-Certificate -FilePath "certs\PressReady.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-```
-
-**Install / remove:**
-
-```powershell
-Add-AppxPackage -Path installer_output\PressReady_2.0.0.msix
-Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage
-```
-
-Portable build: unzip `PressReady_2.0.0-windows-x64.zip` and run `PressReady.exe`.
-
----
-
-## Design notes
-
-1. **Engine vs UI** — The engine imports no Qt; a shared dataclass model is the contract. That
-   is what makes the whole engine testable headless, and would let a CLI reuse it.
-2. **Vectors** — Imposition uses `show_pdf_page`, so quality follows the source PDF.
-3. **One geometry** — `engine/geometry.py` decides what goes where; `impose.py` only renders
-   that plan, and the preview annotates the result the engine hands back. There is no second
-   opinion about layout anywhere in the codebase.
-4. **The UI cannot promise what the engine ignores** — every setting is classified in
-   `engine/capabilities.py`, and adding one to the model fails the build until it is. This is
-   deliberate: v2.0.0 shipped a Layout tab whose booklet modes, signatures and creep the engine
-   silently discarded.
-5. **Millimetres in the model** — units are a display concern only, converted at the widget.
+<sub><b>Keywords:</b> pdf imposition · imposition software · n-up pdf · booklet printing · saddle
+stitch imposition · perfect binding imposition · pdf booklet maker · impose pdf pages · printers
+marks · crop marks pdf · bleed and trim · prepress software · free imposition software · open
+source imposition · Imposition Wizard alternative · Quite Imposing alternative · BookletCreator
+alternative · pdf to press sheet · signature imposition · page creep compensation · gang up
+printing · print shop tools · commercial printing software · pdf prepress · vector imposition ·
+2-up 4-up printing · Windows imposition software · macOS imposition · Linux imposition</sub>

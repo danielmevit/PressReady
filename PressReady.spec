@@ -1,46 +1,59 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PressReady v2 — PyInstaller spec file (one-dir mode)
+"""
+PyInstaller spec — one spec for Windows, macOS and Linux.
 
-import os, sys
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+PyInstaller cannot cross-compile: each platform's artifact has to be built on that
+platform, which is why the release workflow runs a job per OS rather than building
+everything here. This file only handles what differs *per platform*: the icon format
+and the macOS .app bundle.
 
-block_cipher = None
+Run via the packaging scripts (packaging/<os>/build.*), not directly, so the version
+and output names come from pressready/__init__.py.
+"""
 
-# Collect PyQt6 submodules so nothing is missed
-pyqt6_hiddens = collect_submodules("PyQt6")
+import os
+import sys
+
+from PyInstaller.utils.hooks import collect_submodules
+
+sys.path.insert(0, os.path.abspath("."))
+from pressready import __version__  # noqa: E402
+
+IS_WIN = sys.platform == "win32"
+IS_MAC = sys.platform == "darwin"
+
+# Windows wants .ico, macOS wants .icns, Linux ships the PNGs and uses a .desktop file.
+if IS_WIN:
+    icon = "assets/icons/pressready.ico"
+elif IS_MAC:
+    icon = "assets/icons/pressready.icns" if os.path.exists(
+        "assets/icons/pressready.icns") else None
+else:
+    icon = None
 
 a = Analysis(
     ["pressready/__main__.py"],
     pathex=[],
     binaries=[],
-    datas=[
-        ("assets/icons", "assets/icons"),
-    ],
-    hiddenimports=[
-        "fitz",
-        "fitz.fitz",
-        *pyqt6_hiddens,
-    ],
+    datas=[("assets/icons", "assets/icons")],
+    hiddenimports=["fitz", "fitz.fitz", *collect_submodules("PyQt6")],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        "tkinter",
-        "matplotlib",
-        "numpy",
-        "scipy",
-        "pandas",
-        "PIL",
-        "IPython",
-        "notebook",
-        "pytest",
-        "pytest_qt",
+        "tkinter", "matplotlib", "numpy", "scipy", "pandas", "PIL",
+        "IPython", "notebook", "pytest", "pytest_qt",
+        # Qt modules the app never touches — each is tens of MB.
+        "PyQt6.QtWebEngineCore", "PyQt6.QtWebEngineWidgets", "PyQt6.QtQuick",
+        "PyQt6.QtQml", "PyQt6.Qt3DCore", "PyQt6.QtMultimedia", "PyQt6.QtBluetooth",
+        "PyQt6.QtCharts", "PyQt6.QtDataVisualization", "PyQt6.QtSql",
+        "PyQt6.QtTest", "PyQt6.QtNetworkAuth", "PyQt6.QtPositioning",
     ],
     noarchive=False,
     optimize=0,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data)
 
 exe = EXE(
     pyz,
@@ -51,14 +64,15 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    # UPX mangles Qt libraries on macOS and is not worth the risk on Linux either.
+    upx=IS_WIN,
     console=False,
     disable_windowed_traceback=False,
-    argv_emulation=False,
+    argv_emulation=IS_MAC,   # lets Finder "open with" pass the PDF path through
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon="assets/icons/pressready.ico",
+    icon=icon,
 )
 
 coll = COLLECT(
@@ -66,7 +80,28 @@ coll = COLLECT(
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=IS_WIN,
     upx_exclude=[],
     name="PressReady",
 )
+
+if IS_MAC:
+    app = BUNDLE(
+        coll,
+        name="PressReady.app",
+        icon=icon,
+        bundle_identifier="xyz.damt.pressready",
+        version=__version__,
+        info_plist={
+            "CFBundleShortVersionString": __version__,
+            "CFBundleVersion": __version__,
+            "NSHighResolutionCapable": True,
+            "LSMinimumSystemVersion": "11.0",
+            "CFBundleDocumentTypes": [{
+                "CFBundleTypeName": "PDF document",
+                "CFBundleTypeRole": "Editor",
+                "LSItemContentTypes": ["com.adobe.pdf"],
+                "LSHandlerRank": "Alternate",
+            }],
+        },
+    )

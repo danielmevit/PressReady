@@ -17,6 +17,8 @@ the structure, density and control anatomy, not the branding.
 
 from math import cos, pi, sin
 
+from PyQt6.QtGui import QColor, QPalette
+
 
 # ── OKLCH → sRGB ─────────────────────────────────────
 
@@ -102,6 +104,42 @@ FONT_FAMILY = "Segoe UI"  # Toolcraft ships Inter; this is the platform equivale
 
 
 # ── the global stylesheet ────────────────────────────
+
+def palette() -> QPalette:
+    """
+    A dark QPalette.
+
+    The stylesheet can't be the only defence: any widget a QSS rule doesn't reach
+    falls back to the platform palette, which is light — that is exactly how the
+    settings panel ended up painting near-white behind near-white section titles.
+    The palette makes dark the default and the stylesheet does the styling.
+    """
+    p = QPalette()
+    p.setColor(QPalette.ColorRole.Window, QColor(BG))
+    p.setColor(QPalette.ColorRole.WindowText, QColor(FG))
+    p.setColor(QPalette.ColorRole.Base, QColor(SURFACE))
+    p.setColor(QPalette.ColorRole.AlternateBase, QColor(RAISED))
+    p.setColor(QPalette.ColorRole.Text, QColor(FG))
+    p.setColor(QPalette.ColorRole.Button, QColor(INPUT_BG))
+    p.setColor(QPalette.ColorRole.ButtonText, QColor(FG))
+    p.setColor(QPalette.ColorRole.ToolTipBase, QColor(RAISED))
+    p.setColor(QPalette.ColorRole.ToolTipText, QColor(FG))
+    p.setColor(QPalette.ColorRole.Highlight, QColor(ACCENT))
+    p.setColor(QPalette.ColorRole.HighlightedText, QColor(ACCENT_FG))
+    p.setColor(QPalette.ColorRole.PlaceholderText, QColor(FG_FAINT))
+    p.setColor(QPalette.ColorRole.Link, QColor(ACCENT))
+    for role in (QPalette.ColorRole.WindowText, QPalette.ColorRole.Text,
+                 QPalette.ColorRole.ButtonText):
+        p.setColor(QPalette.ColorGroup.Disabled, role, QColor(FG_FAINT))
+    return p
+
+
+def apply(app) -> None:
+    """Dress the whole application: palette first, then the stylesheet."""
+    app.setStyle("Fusion")  # consistent across Windows/macOS/Linux; honours the palette
+    app.setPalette(palette())
+    app.setStyleSheet(stylesheet())
+
 
 def stylesheet() -> str:
     """
@@ -190,7 +228,13 @@ QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
 QCheckBox::indicator:hover, QRadioButton::indicator:hover {{ border-color: {ACCENT}; }}
 
 /* containers */
-QScrollArea {{ border: none; background: transparent; }}
+/* The viewport is a child widget of its own, so a bare `QScrollArea` rule never
+   reaches it and it falls back to the platform palette — which is light. That put
+   near-white section titles on a near-white background and made them invisible.
+   Style the scroll area *and* its viewport child. */
+QScrollArea, QAbstractScrollArea {{ border: none; background: transparent; }}
+QScrollArea > QWidget > QWidget {{ background: transparent; }}
+QAbstractScrollArea::viewport {{ background: transparent; }}
 QSplitter::handle {{ background: {BORDER}; }}
 QProgressBar {{ background: {INPUT_BG}; border: none; border-radius: {RADIUS_SM}px;
                 text-align: center; color: {FG}; height: 6px; }}

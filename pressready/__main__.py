@@ -29,12 +29,14 @@ def run_gui(pdf: str = "") -> int:
     from PyQt6.QtWidgets import QApplication
     from PyQt6.QtGui import QFont
 
+    from pressready.ui import theme
     from pressready.ui.main_window import MainWindow, app_icon
 
     if sys.platform == "win32":
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("pressready.v2")
 
     app = QApplication(sys.argv)
+    theme.apply(app)
     app.setApplicationName("PressReady")
     app.setApplicationVersion(__version__)
     app.setWindowIcon(app_icon())

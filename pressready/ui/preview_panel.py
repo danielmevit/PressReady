@@ -19,9 +19,10 @@ from PyQt6.QtGui import QPixmap, QImage, QFont, QPainter, QPen, QColor
 import fitz
 
 from pressready.engine.data_model import Project
+from pressready.ui import theme as t
 from pressready.engine.impose import ImposeResult, impose_to_temp
 
-MAGENTA = QColor(255, 0, 144)
+MAGENTA = QColor(t.OVERLAY)
 
 
 # ── cell geometry for overlays ───────────────────────
@@ -85,7 +86,7 @@ def draw_overlays(
 
         if show_numbers and c.page_num > 0:
             fs = max(14, int(min(pw, ph) * 0.18))
-            f = QFont("Segoe UI", fs)
+            f = QFont(t.FONT_FAMILY, fs)
             f.setBold(True)
             painter.setFont(f)
             painter.setPen(MAGENTA)
@@ -195,7 +196,7 @@ class SheetCanvas(QScrollArea):
         self.setWidgetResizable(True)
         self.setStyleSheet("QScrollArea { border: none; }")
         self._content = QWidget()
-        self._content.setStyleSheet("background: #1e1e1e;")
+        self._content.setStyleSheet(f"background: {t.BG};")
         self.setWidget(self._content)
         self._grid = QGridLayout(self._content)
         self._grid.setSpacing(16)
@@ -206,7 +207,7 @@ class SheetCanvas(QScrollArea):
         self._clear_grid()
         lbl = QLabel("Open a PDF to get started\n\nFile \u2192 Open PDF  (Ctrl+O)\nor drag and drop a PDF here")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("color: #666; font-size: 15px; padding: 60px;")
+        lbl.setStyleSheet(f"color: {t.FG_FAINT}; font-size: {t.TEXT_LG}px; padding: 60px;")
         self._grid.addWidget(lbl, 0, 0)
 
     def _clear_grid(self):
@@ -337,7 +338,7 @@ class SheetCanvas(QScrollArea):
         self._clear_grid()
         lbl = QLabel(f"Render error:\n{msg}")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("color: #ff6b6b; font-size: 13px; padding: 40px;")
+        lbl.setStyleSheet(f"color: {t.DESTRUCTIVE}; font-size: {t.TEXT_SM}px; padding: 40px;")
         self._grid.addWidget(lbl, 0, 0)
 
     # ── display ──────────────────────────────────
@@ -368,12 +369,12 @@ class SheetCanvas(QScrollArea):
             scaled = pm.scaledToWidth(target_w, Qt.TransformationMode.SmoothTransformation)
             lbl.setPixmap(scaled)
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            lbl.setStyleSheet("border: 1px solid #3e3e42;")
+            lbl.setStyleSheet(f"border: 1px solid {t.BORDER};")
             vbox.addWidget(lbl)
 
             num = QLabel(str(i + 1))
             num.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            num.setStyleSheet("color: #888; font-size: 11px; background: transparent;")
+            num.setStyleSheet(f"color: {t.FG_FAINT}; font-size: {t.TEXT_2XS}px; background: transparent;")
             vbox.addWidget(num)
 
             self._grid.addWidget(container, row, col,

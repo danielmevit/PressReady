@@ -261,7 +261,12 @@ class _TutorialsDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(t.stylesheet())
+        # Dress the whole application, not just this window: dialogs and any widget a
+        # QSS rule doesn't reach need the dark palette too, or they fall back to the
+        # platform's light one.
+        app = QApplication.instance()
+        if app is not None:
+            t.apply(app)
         self.setWindowIcon(app_icon())
         self.setMinimumSize(1100, 750)
         self.resize(1440, 900)

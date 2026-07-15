@@ -44,3 +44,10 @@ certs/
 
 # Node
 node_modules/
+
+# Astro site build output (published by .github/workflows/deploy.yml)
+site/dist/
+site/.astro/
+
+# Reference material — mood/source images, not shipped
+refs/

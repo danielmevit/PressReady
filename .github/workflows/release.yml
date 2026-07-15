@@ -1,0 +1,163 @@
+name: Release
+
+# Builds every distributable on a version tag (and on demand).
+#
+# PyInstaller cannot cross-compile, so there is one job per target rather than a
+# matrix on a single runner. Every job runs the test suite and the headless --smoke
+# check before packaging: a broken build should never reach a release page.
+#
+# Binaries are unsigned — Windows SmartScreen and macOS Gatekeeper will warn on first
+# run. That is documented in the README and docs/ai/GOTCHAS.md.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            python-arch: x64
+          - arch: x86     # 32-bit: portable only, for older machines
+            python-arch: x86
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: ${{ matrix.python-arch }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" pyinstaller
+
+      - name: Tests
+        run: pytest -q
+
+      - name: Smoke gate
+        run: python -m pressready --smoke
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+      - name: Build portable ZIP (+ MSIX on x64)
+        run: powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pressready-windows-${{ matrix.arch }}
+          path: |
+            dist/PressReady-*-windows-*-portable.zip
+            dist/PressReady-*-windows-x64.msix
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/PressReady-*-windows-*-portable.zip
+            dist/PressReady-*-windows-x64.msix
+
+  linux:
+    name: Linux (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: System deps for headless Qt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libegl1 libxkbcommon-x11-0 libxcb-cursor0 \
+            libxcb-icccm4 libxcb-keysyms1 libxcb-shape0
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" pyinstaller
+
+      - name: Tests
+        run: xvfb-run -a pytest -q
+
+      - name: Smoke gate
+        run: xvfb-run -a python -m pressready --smoke
+
+      - name: Build tar.gz
+        run: bash packaging/linux/build.sh
+
+      - name: Smoke gate on the built bundle
+        run: |
+          tar -xzf dist/PressReady-*-linux-x86_64.tar.gz -C /tmp
+          xvfb-run -a /tmp/PressReady-*-linux-x86_64/PressReady --smoke
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pressready-linux
+          path: dist/PressReady-*-linux-x86_64.tar.gz
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PressReady-*-linux-x86_64.tar.gz
+
+  macos:
+    name: macOS (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14   # Apple silicon
+            arch: arm64
+          - runner: macos-13   # Intel
+            arch: x86_64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" pyinstaller
+
+      - name: Tests
+        run: pytest -q
+        env:
+          QT_QPA_PLATFORM: offscreen
+
+      - name: Smoke gate
+        run: python -m pressready --smoke
+
+      - name: Build .dmg
+        run: bash packaging/macos/build.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pressready-macos-${{ matrix.arch }}
+          path: dist/PressReady-*-macos-*.dmg
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PressReady-*-macos-*.dmg

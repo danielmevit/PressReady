@@ -10,6 +10,7 @@ from PyQt6.QtCore import pyqtSignal, Qt
 from pressready.engine.data_model import (
     PreprocessorStep, PreprocessorType, RotateAngle,
 )
+from pressready.ui import theme as t
 
 
 _AVAILABLE = [
@@ -35,17 +36,26 @@ class PreprocessorsTab(QWidget):
 
         lbl = QLabel("Page transforms applied before imposition.")
         lbl.setWordWrap(True)
-        lbl.setStyleSheet("color:#888; font-size:11px; margin-bottom:6px;")
+        lbl.setStyleSheet(f"color:{t.FG_MUTED}; font-size:{t.TEXT_2XS}px; margin-bottom:6px;")
         root.addWidget(lbl)
 
         self._list = QListWidget()
         self._list.currentRowChanged.connect(self._on_select)
+        # Bounded: an empty list that fills the panel reads as a broken black box.
+        self._list.setMinimumHeight(72)
+        self._list.setMaximumHeight(180)
         root.addWidget(self._list)
+
+        self._empty = QLabel("No transforms — pages are imposed as they are.")
+        self._empty.setWordWrap(True)
+        self._empty.setStyleSheet(
+            f"color:{t.FG_FAINT}; font-size:{t.TEXT_2XS}px; padding:2px 2px 6px 2px;")
+        root.addWidget(self._empty)
 
         btn_row = QHBoxLayout()
         self._add_combo = QComboBox()
-        for t in _AVAILABLE:
-            self._add_combo.addItem(t.value, t)
+        for kind in _AVAILABLE:
+            self._add_combo.addItem(kind.value, kind)
         btn_row.addWidget(self._add_combo, stretch=1)
 
         add_btn = QPushButton("+")
@@ -121,10 +131,11 @@ class PreprocessorsTab(QWidget):
             prefix = "✓" if s.enabled else "✗"
             self._list.addItem(f"{prefix}  {s.type.value}")
         self._settings_group.setVisible(False)
+        self._empty.setVisible(not self._steps)
 
     def _on_add(self):
-        t = self._add_combo.currentData()
-        step = PreprocessorStep(type=t)
+        kind = self._add_combo.currentData()
+        step = PreprocessorStep(type=kind)
         self._steps.append(step)
         self._rebuild_list()
         self._list.setCurrentRow(len(self._steps) - 1)

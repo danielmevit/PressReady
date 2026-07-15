@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSignal
 
 from pressready.engine.data_model import MarkItem, MarkType
+from pressready.ui import theme as t
 
 
 _AVAILABLE = list(MarkType)
@@ -27,12 +28,21 @@ class MarksTab(QWidget):
 
         lbl = QLabel("Print marks added to the output sheet.")
         lbl.setWordWrap(True)
-        lbl.setStyleSheet("color:#888; font-size:11px; margin-bottom:6px;")
+        lbl.setStyleSheet(f"color:{t.FG_MUTED}; font-size:{t.TEXT_2XS}px; margin-bottom:6px;")
         root.addWidget(lbl)
 
         self._list = QListWidget()
         self._list.currentRowChanged.connect(self._on_select)
+        # Bounded: an empty list that fills the panel reads as a broken black box.
+        self._list.setMinimumHeight(72)
+        self._list.setMaximumHeight(180)
         root.addWidget(self._list)
+
+        self._empty = QLabel("No marks — sheets print clean.")
+        self._empty.setWordWrap(True)
+        self._empty.setStyleSheet(
+            f"color:{t.FG_FAINT}; font-size:{t.TEXT_2XS}px; padding:2px 2px 6px 2px;")
+        root.addWidget(self._empty)
 
         btn_row = QHBoxLayout()
         self._add_combo = QComboBox()
@@ -143,6 +153,7 @@ class MarksTab(QWidget):
 
         root.addWidget(self._settings_group)
         root.addStretch()
+        self._settings_group.setVisible(False)  # nothing selected yet
 
     def _on_browse_mark(self):
         from PyQt6.QtWidgets import QFileDialog
@@ -150,7 +161,6 @@ class MarksTab(QWidget):
             self, "Choose mark artwork", "", "PDF Files (*.pdf)")
         if path:
             self._mark_path.setText(path)
-        self._settings_group.setVisible(False)
 
     # ── public ───────────────────────────────────
 
@@ -169,6 +179,7 @@ class MarksTab(QWidget):
             prefix = "✓" if m.enabled else "✗"
             self._list.addItem(f"{prefix}  {m.mark_type.value}")
         self._settings_group.setVisible(False)
+        self._empty.setVisible(not self._items)
 
     def _on_add(self):
         mt = self._add_combo.currentData()
