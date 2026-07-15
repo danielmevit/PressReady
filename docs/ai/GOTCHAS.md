@@ -44,10 +44,33 @@
   to rebuild pages). The caller owns the input; if the returned doc differs, close both.
 
 ## Build / packaging
-- MSIX build needs a Windows 10 SDK; `certs/` (signing keys) is gitignored — first run of
-  `build_msix.ps1` self-signs. Trust the cert once via elevated PowerShell (README).
-- PyInstaller frozen mode resolves icons via `sys._MEIPASS` (`_app_icon()` in
+- **PyInstaller cannot cross-compile.** Every artifact is built on its own OS by
+  `.github/workflows/release.yml`. You cannot produce the macOS or 32-bit Windows build
+  from this machine; tag a version (or run the workflow by hand) and let CI do it.
+- **Never name a build file a case-variant of another.** `packaging/linux/build.sh` used to
+  write a launcher called `pressready` beside the `PressReady` binary. On `/mnt/d`
+  (case-insensitive) that is the *same file*: the script overwrote the binary and then
+  exec'd itself forever. CI's ext4 is case-sensitive, so it would never have caught it. The
+  build now hard-fails if the output binary is under 1 MB.
+- MSIX build needs a Windows 10 SDK; `certs/` (signing keys) is gitignored — the first run of
+  `packaging\windows\build.ps1` self-signs. Trust the cert once via elevated PowerShell.
+- MSIX needs a **four-part** version and refuses to install over a newer one. `__version__`
+  is three parts and the script appends `.0`. Going 2.0.0 → 0.3.0 means existing MSIX
+  installs must be removed by hand first.
+- PyInstaller frozen mode resolves icons via `sys._MEIPASS` (`app_icon()` in
   `ui/main_window.py`) — test icon changes in a frozen build, not just from source.
+- The site lives in `site/` (Astro) and deploys **from `main`**, not `dev`.
+
+## Qt traps
+- **The dark theme needs the palette, not just the stylesheet.** Any widget a QSS rule
+  doesn't reach falls back to the platform palette, which is light. `QScrollArea`'s viewport
+  is a separate child widget, so `QScrollArea { background: transparent }` misses it — that
+  is how the settings panel ended up painting near-white behind near-white titles. Always go
+  through `theme.apply(app)`.
+- **Widgets don't follow the store on their own.** After undo/redo or a preset load, call
+  `SchemaTab.sync_from_store()` — and if you add a control type to `ui/panel.py`, teach
+  `sync_from_store` about it. A test enforces that every control is resyncable.
+- Watch for local names shadowing `theme as t` (`for t in ...` cost an hour).
 
 ## Repo oddities
 - `pressready-voice/` (tray dictation app) and `framer-demo/` (web demo) are **separate

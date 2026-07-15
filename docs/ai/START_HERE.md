@@ -1,29 +1,38 @@
 # START HERE — PressReady
 
 ## What this is
-PressReady v2 — a Windows desktop app for **PDF imposition** (laying out source pages on
-press sheets for commercial printing). Python 3.10+, PyQt6 UI, PyMuPDF (fitz) engine.
-v2.0.0 shipped 2026-02-19 (MSIX + portable ZIP). License: AGPL-3.0-only.
+PressReady — a desktop app for **PDF imposition** (laying out source pages on press sheets
+for commercial printing). Python 3.10+, PyQt6 UI, PyMuPDF (fitz) engine. Runs on Windows,
+macOS and Linux. Current version **0.3.0**. License: AGPL-3.0-only.
 
 ## Current priority
-**`ROADMAP.md` — start at Phase 1 (Ground truth).** The plan is grounded in a study of
-Imposition Wizard 3 and Toolcraft (`docs/ai/REFERENCE_STUDY.md`); read the roadmap's
-one-paragraph summary before touching engine code — it explains why the test harness comes
-before every other improvement.
+**v0.3.0 is built and pushed on `dev`; see `ROADMAP.md` backlog for what's next.** All six
+planned phases have landed (CHANGELOG.md has the detail). The plan was grounded in a study of
+Imposition Wizard 3 and Toolcraft — `docs/ai/REFERENCE_STUDY.md`.
 
-The short version of what's wrong: nothing verifies the output, the UI promises features the
-engine ignores (booklet modes, creep, signatures, 9 of 12 preprocessors), and imposition uses
-the source MediaBox rather than its TrimBox. See `GOTCHAS.md` before trusting `data_model.py`
-as a spec — `engine/impose.py` is the truth.
+Two things to know before changing anything:
+- **The UI cannot offer a setting the engine ignores.** `engine/capabilities.py` classifies
+  every setting and the tests fail if one escapes. That is the guard against v2.0.0's central
+  defect; don't route around it.
+- **Settings UI is declared, not written.** Add a schema entry in `ui/schema.py`; don't
+  hand-build controls.
+
+Releasing: tag `vX.Y.Z` and `.github/workflows/release.yml` builds all five artifacts. The
+website deploys from `main`.
 
 ## How to run
-- **App (Windows Python, not WSL):** `pip install PyQt6 PyMuPDF` then `python -m pressready`
-- **Engine tests (WSL or Windows):** `pip install -e .[dev]` then `pytest`
-- **Installer build (Windows PowerShell):** `powershell -ExecutionPolicy Bypass -File build_msix.ps1`
+- **App:** `pip install -e .` then `python -m pressready`
+- **Tests:** `pip install -e ".[dev]"` then `pytest` — 243 of them, no display needed.
+  In WSL use the venv at `~/.venvs/pressready` (see GOTCHAS).
+- **Self-check:** `python -m pressready --smoke` — headless, end to end, exits 0/1.
+- **Packaging:** `packaging/{windows,linux,macos}/` — each runs on its own OS.
 
 ## Layout of the work
-- `pressready/engine/` — data model, imposition, marks, preprocessors. **No Qt imports.**
-- `pressready/ui/` — main window, four settings tabs, preview canvas.
+- `pressready/engine/` — data model, geometry, imposition, marks, preprocessors,
+  preflight, capabilities. **No Qt imports** — that's what makes it testable.
+- `pressready/ui/` — `schema.py` (what the panel offers), `panel.py` (renders it),
+  `components.py`, `theme.py` (every colour), preview canvas.
+- `site/` — the Astro website. `packaging/` — the installers.
 - Everything else structural: ask CodeGraph (`codegraph explore "..."`), don't crawl.
 
 ## Links
