@@ -8,6 +8,11 @@ name: Release
 #
 # Binaries are unsigned — Windows SmartScreen and macOS Gatekeeper will warn on first
 # run. That is documented in the README and docs/ai/GOTCHAS.md.
+#
+# Build jobs only upload artifacts; the single `release` job at the bottom publishes
+# them. Letting all five build jobs create the release themselves means five runners
+# racing to create the same thing — which ends in a duplicate-create error or a
+# release page that is missing whichever platform lost the race.
 
 on:
   push:
@@ -61,13 +66,6 @@ jobs:
             dist/PressReady-*-windows-x64.msix
           if-no-files-found: error
 
-      - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            dist/PressReady-*-windows-*-portable.zip
-            dist/PressReady-*-windows-x64.msix
 
   linux:
     name: Linux (x86_64)
@@ -110,11 +108,6 @@ jobs:
           path: dist/PressReady-*-linux-x86_64.tar.gz
           if-no-files-found: error
 
-      - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/PressReady-*-linux-x86_64.tar.gz
 
   macos:
     name: macOS (${{ matrix.arch }})
@@ -156,8 +149,43 @@ jobs:
           path: dist/PressReady-*-macos-*.dmg
           if-no-files-found: error
 
-      - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/')
+  release:
+    name: Publish the release
+    needs: [windows, linux, macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect every platform's artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Show what will be published
+        run: ls -lh artifacts
+
+      - name: Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/PressReady-*-macos-*.dmg
+          files: artifacts/*
+          fail_on_unmatched_files: true
+          body: |
+            PDF imposition for print — lay your pages out on the press sheet.
+
+            **Windows** — `.msix` installs; the `-portable.zip` just unzips and runs.
+            A 32-bit portable build is here for older machines.
+            **macOS** — `.dmg`, drag to Applications. First launch: right-click → Open.
+            **Linux** — extract the `.tar.gz` and run `./PressReady`. No Python needed.
+
+            Nothing is signed yet, so Windows and macOS will warn about an unknown
+            publisher on first run. On Windows that's **More info → Run anyway**.
+
+            What changed is in [CHANGELOG.md](https://github.com/danielmevit/pressready/blob/main/CHANGELOG.md).
+            The site is at https://danielmevit.github.io/pressready/.
+
+            If you have the February build (published then as v2.0.0) installed, remove
+            it first — its MSIX declares 2.0.0.0 internally and Windows will not install
+            an older version over a newer one:
+            `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage`
