@@ -1,10 +1,16 @@
 <#
     Windows build: PyInstaller bundle -> portable ZIP (+ MSIX where possible).
 
+    KEEP THIS FILE PURE ASCII. Windows PowerShell 5.1 reads a BOM-less .ps1 as ANSI
+    (cp1252), so a UTF-8 em-dash arrives as three bytes whose last one is a curly
+    quote -- which PowerShell honours as a string terminator. One em-dash in a
+    Write-Host message silently unbalanced every brace after it and the whole script
+    failed to parse. tests/test_packaging.py enforces this.
+
     Handles both architectures. The arch is whatever the running Python is: a 32-bit
     Python produces a 32-bit build, so CI just points this at the right interpreter.
 
-    MSIX is 64-bit only here — it needs the Windows SDK's makeappx/signtool, and the
+    MSIX is 64-bit only here -- it needs the Windows SDK's makeappx/signtool, and the
     32-bit audience is people on old machines who want a folder they can copy, not a
     packaged installer.
 
@@ -22,7 +28,7 @@ $ErrorActionPreference = "Stop"
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 Push-Location $root
 
-# ── version + arch: both discovered, never restated ──
+# -- version + arch: both discovered, never restated --
 $python = if ($env:PYTHON) { $env:PYTHON } else { "python" }
 $version = (& $python -c "import pressready; print(pressready.__version__)").Trim()
 $bits = (& $python -c "import struct; print(struct.calcsize('P') * 8)").Trim()
@@ -33,23 +39,23 @@ if ($version -notmatch '^\d+\.\d+\.\d+$') {
     Write-Error "pressready/__init__.py must carry a three-part version (got '$version'); MSIX appends the fourth."
 }
 
-Write-Host "=== PressReady $version — Windows $arch build ===" -ForegroundColor Cyan
+Write-Host "=== PressReady $version -- Windows $arch build ===" -ForegroundColor Cyan
 
 $outDir = "$root\dist"
 $stageDir = "$root\build\msix_stage"
 $portableName = "PressReady-$version-windows-$arch-portable"
 
-# ── 1. PyInstaller ───────────────────────────────────
+# -- 1. PyInstaller -----------------------------------
 if (-not $SkipPyInstaller) {
     Write-Host "`n--- PyInstaller ---" -ForegroundColor Cyan
     & $python -m PyInstaller PressReady.spec --noconfirm --distpath dist --workpath build
     if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller failed" }
 }
 if (-not (Test-Path "$outDir\PressReady\PressReady.exe")) {
-    Write-Error "No bundle at dist\PressReady — run without -SkipPyInstaller"
+    Write-Error "No bundle at dist\PressReady -- run without -SkipPyInstaller"
 }
 
-# ── 2. Portable ZIP ──────────────────────────────────
+# -- 2. Portable ZIP ----------------------------------
 Write-Host "`n--- Portable ZIP ---" -ForegroundColor Cyan
 $portableDir = "$outDir\$portableName"
 if (Test-Path $portableDir) { Remove-Item $portableDir -Recurse -Force }
@@ -58,7 +64,7 @@ foreach ($doc in @("README.md", "LICENSE", "NOTICE")) {
     if (Test-Path "$root\$doc") { Copy-Item "$root\$doc" $portableDir }
 }
 @"
-PressReady $version — portable ($arch)
+PressReady $version -- portable ($arch)
 
 Run PressReady.exe. Nothing is installed and nothing is written outside this
 folder except your own settings (in the registry under HKCU\Software\PressReady)
@@ -73,7 +79,7 @@ if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 Compress-Archive -Path "$portableDir\*" -DestinationPath $zipPath
 Write-Host "[ok] $zipPath" -ForegroundColor Green
 
-# ── 3. MSIX (64-bit only) ────────────────────────────
+# -- 3. MSIX (64-bit only) ----------------------------
 if ($SkipMsix -or $arch -eq "x86") {
     Write-Host "`n[skip] MSIX (32-bit builds ship portable only)" -ForegroundColor Yellow
     Pop-Location
@@ -84,7 +90,7 @@ $sdk = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Directory -
     Where-Object { Test-Path "$($_.FullName)\x64\makeappx.exe" } |
     Sort-Object Name -Descending | Select-Object -First 1
 if (-not $sdk) {
-    Write-Host "[skip] MSIX — no Windows 10 SDK found (portable ZIP is built)" -ForegroundColor Yellow
+    Write-Host "[skip] MSIX -- no Windows 10 SDK found (portable ZIP is built)" -ForegroundColor Yellow
     Pop-Location
     exit 0
 }
