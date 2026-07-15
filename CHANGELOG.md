@@ -17,14 +17,23 @@ installed, remove it before putting 0.3.0 on:
 
 ### Packaging — Windows, macOS, Linux
 
-- **Five artifacts, built by CI on every version tag** (`.github/workflows/release.yml`):
-  Windows x64 (MSIX + portable ZIP), Windows **32-bit** (portable — print shops keep old
-  machines), macOS **arm64 and Intel** (.dmg), and Linux x86_64 (portable tar.gz). PyInstaller
-  can't cross-compile, so each runs on its own runner. Every job runs the tests *and* `--smoke`
-  before packaging, and the Linux job smoke-tests the built bundle itself.
+- **Four artifacts, built by CI on every version tag** (`.github/workflows/release.yml`):
+  Windows x64 (MSIX + portable ZIP), macOS **arm64 and Intel** (.dmg), and Linux x86_64
+  (portable tar.gz). PyInstaller can't cross-compile, so each runs on its own runner. Every job
+  runs the tests *and* `--smoke` before packaging, and the Linux job smoke-tests the built
+  bundle itself.
+- **No 32-bit Windows build.** It was planned and attempted, and it can't be done: PyQt6 ships
+  no `win32` wheel (only `win_amd64`/`win_arm64`), so pip falls back to the source tarball and
+  tries to build Qt with qmake. A 32-bit build would mean compiling Qt from source for x86.
+  The claim has been removed from the README and the site rather than left standing.
 - One cross-platform `PressReady.spec` (per-OS icon, macOS `.app` bundle, PDF file
   association); `packaging/{windows,linux,macos}/` scripts replace `build_msix.ps1`.
 - Trimmed unused Qt modules (WebEngine, Quick, QML, Multimedia, …) out of the bundle.
+- **Windows build fix:** `build.ps1` failed to parse before running a line. Windows PowerShell
+  5.1 reads a BOM-less `.ps1` as ANSI (cp1252), so a UTF-8 em-dash in a `Write-Host` message
+  arrived as three bytes ending in a curly quote — which PowerShell treats as a string
+  terminator, unbalancing every brace after it. The script is now pure ASCII, and
+  `tests/test_packaging.py` enforces that from Linux.
 - **Linux build fix:** the launcher script was named `pressready` next to the `PressReady`
   binary. On a case-insensitive filesystem — i.e. building from WSL against a Windows drive —
   those are the same file, so the script overwrote the 100 MB binary and then exec'd itself

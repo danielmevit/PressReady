@@ -44,6 +44,17 @@
   to rebuild pages). The caller owns the input; if the returned doc differs, close both.
 
 ## Build / packaging
+- **There is no 32-bit Windows build and there cannot be a sensible one.** PyQt6 publishes
+  `win_amd64` and `win_arm64` wheels only — no `win32`. Point a 32-bit Python at it and pip
+  falls back to `pyqt6-*.tar.gz` and tries to build Qt with qmake, which fails. Shipping x86
+  would mean compiling Qt from source for x86. This was attempted in the v0.3.0 release build;
+  don't attempt it again. (PyMuPDF *does* ship win32, so it is PyQt6 alone that decides this.)
+  Note PyQt6 *does* ship `win_arm64` — a Windows-on-ARM build is possible if ever wanted.
+- **Keep `.ps1` files pure ASCII.** Windows PowerShell 5.1 reads a BOM-less `.ps1` as ANSI
+  (cp1252), so a UTF-8 em-dash becomes three bytes ending in a curly quote — which PowerShell
+  honours as a string terminator. One em-dash in a `Write-Host` message unbalanced every brace
+  after it and the script failed to parse before running a line. `tests/test_packaging.py`
+  enforces ASCII; it runs on Linux, so a Windows-only trap is caught everywhere.
 - **PyInstaller cannot cross-compile.** Every artifact is built on its own OS by
   `.github/workflows/release.yml`. You cannot produce the macOS or 32-bit Windows build
   from this machine; tag a version (or run the workflow by hand) and let CI do it.

@@ -23,24 +23,20 @@ permissions:
   contents: write
 
 jobs:
+  # 64-bit only. PyQt6 publishes no 32-bit Windows wheel (win_amd64 and win_arm64
+  # only), so pip falls back to the source tarball and tries to build Qt with qmake,
+  # which fails. A 32-bit build would mean compiling Qt from source for x86 — not a
+  # realistic proposition for this project. See docs/ai/GOTCHAS.md.
   windows:
-    name: Windows (${{ matrix.arch }})
+    name: Windows (x64)
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x64
-            python-arch: x64
-          - arch: x86     # 32-bit: portable only, for older machines
-            python-arch: x86
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          architecture: ${{ matrix.python-arch }}
+          architecture: x64
 
       - name: Install dependencies
         run: |
@@ -55,12 +51,12 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
 
-      - name: Build portable ZIP (+ MSIX on x64)
+      - name: Build portable ZIP + MSIX
         run: powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pressready-windows-${{ matrix.arch }}
+          name: pressready-windows-x64
           path: |
             dist/PressReady-*-windows-*-portable.zip
             dist/PressReady-*-windows-x64.msix

@@ -26,8 +26,8 @@ It's free, open source, and runs on your own machine. Nothing is uploaded anywhe
 
 **Windows** — download `PressReady-<version>-windows-x64.msix` from
 [Releases](https://github.com/danielmevit/pressready/releases) and double-click. Prefer nothing
-installed? Take the portable `.zip`, unzip it, run `PressReady.exe`. There's a 32-bit portable
-build for older machines.
+installed? Take the portable `.zip`, unzip it, run `PressReady.exe`. **64-bit only** — see the
+FAQ.
 
 **macOS** — download the `.dmg`, drag it to Applications. First launch is right-click → Open (the
 app isn't code-signed yet).
@@ -82,7 +82,7 @@ time. On Windows that's **More info → Run anyway**. Signing costs money and is
 
 ## Requirements
 
-- Windows 10/11, macOS 11+, or a Linux desktop (X11 or Wayland)
+- **64-bit** Windows 10/11, macOS 11+, or a Linux desktop (X11 or Wayland)
 - Nothing else — the downloads include everything
 - Python 3.10+ only if you're running from source
 
@@ -109,7 +109,10 @@ it.
 and getting it subtly wrong wastes plates and paper — so it stays out until someone who runs a
 press has checked it. See [ROADMAP.md](ROADMAP.md).
 
-**Why a 32-bit Windows build?** Because print shops keep machines running for a long time.
+**Is there a 32-bit Windows build?** No, and there can't be a sensible one: PyQt6 — the toolkit
+the interface is built on — only publishes 64-bit Windows packages. Building it for 32-bit would
+mean compiling Qt itself from source, which isn't something this project can support. If you're
+on a 32-bit machine, sorry — that one's not on us to fix.
 
 ## Contributing
 
