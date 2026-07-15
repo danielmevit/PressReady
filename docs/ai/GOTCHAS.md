@@ -55,6 +55,12 @@
   honours as a string terminator. One em-dash in a `Write-Host` message unbalanced every brace
   after it and the script failed to parse before running a line. `tests/test_packaging.py`
   enforces ASCII; it runs on Linux, so a Windows-only trap is caught everywhere.
+- **Hosted runner labels get retired, and a retired label queues forever.** The macOS Intel
+  job asked for `macos-13`, which GitHub has removed entirely. A job requesting a nonexistent
+  label is not rejected — it sits "queued" indefinitely, which blocks the all-platforms release
+  gate, and nothing tells you why. If a job queues for more than ~10 minutes while its siblings
+  run, check the label against https://github.com/actions/runner-images before anything else.
+  Current labels here: `macos-15` (Apple silicon), `macos-15-intel` (Intel).
 - **PyInstaller cannot cross-compile.** Every artifact is built on its own OS by
   `.github/workflows/release.yml`. You cannot produce the macOS or 32-bit Windows build
   from this machine; tag a version (or run the workflow by hand) and let CI do it.

@@ -112,9 +112,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-14   # Apple silicon
+          # Hosted runner labels get retired: macos-13 was removed entirely, and a
+          # job that requests a retired label is not rejected — it queues forever
+          # waiting for a machine that will never come, blocking the release gate.
+          # macos-15-intel is GitHub's current Intel image.
+          - runner: macos-15         # Apple silicon
             arch: arm64
-          - runner: macos-13   # Intel
+          - runner: macos-15-intel   # Intel
             arch: x86_64
     steps:
       - uses: actions/checkout@v4
