@@ -114,19 +114,31 @@ Set-Content "$stageDir\AppxManifest.xml" $manifest -Encoding UTF8
 New-Item -ItemType Directory -Path "$stageDir\assets\icons\msix" -Force | Out-Null
 Copy-Item "$root\assets\icons\msix\*" "$stageDir\assets\icons\msix\"
 
+# The signing certificate. Users must trust the SAME certificate across releases, so
+# CI restores a stable PFX from a repo secret (PRESSREADY_CERT_PFX_B64) before this
+# script runs; the password rides in PRESSREADY_CERT_PASSWORD. A per-run throwaway
+# cert is what shipped v0.3.0's first MSIX -- the .cer users needed to trust existed
+# only on a dead runner VM, so Windows refused the install with 0x800B010A.
 $certDir = "$root\certs"
 $pfxPath = "$certDir\PressReady.pfx"
 $cerPath = "$certDir\PressReady.cer"
-$pfxPassword = "PressReady2026"
+$pfxPassword = if ($env:PRESSREADY_CERT_PASSWORD) { $env:PRESSREADY_CERT_PASSWORD } else { "PressReady2026" }
 if (-not (Test-Path $pfxPath)) {
-    Write-Host "Creating a self-signed certificate (first run)" -ForegroundColor Yellow
+    Write-Host "Creating a self-signed certificate (first run, local builds only)" -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $certDir -Force | Out-Null
     $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=PressReadyTeam" `
         -KeyUsage DigitalSignature -FriendlyName "PressReady" -CertStoreLocation "Cert:\CurrentUser\My" `
+        -NotAfter (Get-Date).AddYears(5) `
         -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
     $pw = ConvertTo-SecureString -String $pfxPassword -Force -AsPlainText
     Export-PfxCertificate -Cert "Cert:\CurrentUser\My\$($cert.Thumbprint)" -FilePath $pfxPath -Password $pw | Out-Null
     Export-Certificate -Cert "Cert:\CurrentUser\My\$($cert.Thumbprint)" -FilePath $cerPath | Out-Null
+}
+if (-not (Test-Path $cerPath)) {
+    # PFX came from the CI secret; derive the public half for publishing.
+    $pw = ConvertTo-SecureString -String $pfxPassword -Force -AsPlainText
+    $pfxData = Get-PfxData -FilePath $pfxPath -Password $pw
+    Export-Certificate -Cert $pfxData.EndEntityCertificates[0] -FilePath $cerPath | Out-Null
 }
 
 $msixPath = "$outDir\PressReady-$version-windows-x64.msix"
@@ -136,7 +148,12 @@ if ($LASTEXITCODE -ne 0) { Write-Error "makeappx failed" }
 & $signtool sign /fd SHA256 /a /f $pfxPath /p $pfxPassword $msixPath
 if ($LASTEXITCODE -ne 0) { Write-Error "signtool failed" }
 
+# Ship the public certificate beside the installer: trusting it once is the install
+# prerequisite, so it belongs on the release page, not in a doc nobody finds.
+Copy-Item $cerPath "$outDir\PressReady-msix-signing.cer"
+
 Write-Host "[ok] $msixPath" -ForegroundColor Green
+Write-Host "[ok] $outDir\PressReady-msix-signing.cer (users trust this once)" -ForegroundColor Green
 Write-Host "`nTrust the certificate once (elevated):" -ForegroundColor Yellow
 Write-Host "  Import-Certificate -FilePath `"$cerPath`" -CertStoreLocation Cert:\LocalMachine\TrustedPeople"
 Pop-Location

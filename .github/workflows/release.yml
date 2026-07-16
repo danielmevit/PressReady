@@ -51,8 +51,23 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
 
+      # The MSIX must be signed with the SAME certificate every release, or users
+      # have to re-trust on every update. The stable self-signed cert lives in repo
+      # secrets; without it the build script mints a per-run throwaway, whose public
+      # half dies with the runner — that is exactly the 0x800B010A users hit on the
+      # first 0.3.0 MSIX.
+      - name: Restore the MSIX signing certificate
+        if: ${{ secrets.PRESSREADY_CERT_PFX_B64 != '' }}
+        env:
+          PFX_B64: ${{ secrets.PRESSREADY_CERT_PFX_B64 }}
+        run: |
+          New-Item -ItemType Directory -Force certs | Out-Null
+          [IO.File]::WriteAllBytes("$PWD\certs\PressReady.pfx", [Convert]::FromBase64String($env:PFX_B64))
+
       - name: Build portable ZIP + MSIX
         run: powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
+        env:
+          PRESSREADY_CERT_PASSWORD: ${{ secrets.PRESSREADY_CERT_PASSWORD }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -60,6 +75,7 @@ jobs:
           path: |
             dist/PressReady-*-windows-*-portable.zip
             dist/PressReady-*-windows-x64.msix
+            dist/PressReady-msix-signing.cer
           if-no-files-found: error
 
 
@@ -174,13 +190,24 @@ jobs:
           body: |
             PDF imposition for print — lay your pages out on the press sheet.
 
-            **Windows** — `.msix` installs; the `-portable.zip` just unzips and runs.
-            64-bit only (PyQt6 ships no 32-bit Windows packages).
+            **Windows, no setup** — the `-portable.zip`: unzip, run `PressReady.exe`
+            (SmartScreen will warn once: **More info → Run anyway**). 64-bit only
+            (PyQt6 ships no 32-bit Windows packages).
+
+            **Windows, installed (MSIX)** — the package is signed with the project's
+            own certificate, and Windows only installs what it trusts, so the first
+            time you need one elevated-PowerShell moment in your download folder:
+
+            ```powershell
+            Import-Certificate -FilePath .\PressReady-msix-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+            Add-AppxPackage (Get-Item .\PressReady-*-windows-x64.msix)
+            ```
+
+            That trust is one-time — future releases are signed with the same
+            certificate. (Skipping the first line gets you error 0x800B010A.)
+
             **macOS** — `.dmg`, drag to Applications. First launch: right-click → Open.
             **Linux** — extract the `.tar.gz` and run `./PressReady`. No Python needed.
-
-            Nothing is signed yet, so Windows and macOS will warn about an unknown
-            publisher on first run. On Windows that's **More info → Run anyway**.
 
             What changed is in [CHANGELOG.md](https://github.com/danielmevit/pressready/blob/main/CHANGELOG.md).
             The site is at https://danielmevit.github.io/pressready/.

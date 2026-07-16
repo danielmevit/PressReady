@@ -24,10 +24,19 @@ It's free, open source, and runs on your own machine. Nothing is uploaded anywhe
 
 ## Install
 
-**Windows** — download `PressReady-<version>-windows-x64.msix` from
-[Releases](https://github.com/danielmevit/pressready/releases) and double-click. Prefer nothing
-installed? Take the portable `.zip`, unzip it, run `PressReady.exe`. **64-bit only** — see the
-FAQ.
+**Windows** — easiest is the portable `.zip` from
+[Releases](https://github.com/danielmevit/pressready/releases): unzip, run `PressReady.exe`
+(SmartScreen warns once — **More info → Run anyway**). Prefer a proper install? The `.msix` is
+signed with the project's own certificate, so Windows asks you to trust it once first — grab
+`PressReady-msix-signing.cer` from the same release and, in an **elevated** PowerShell:
+
+```powershell
+Import-Certificate -FilePath .\PressReady-msix-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+Add-AppxPackage .\PressReady-<version>-windows-x64.msix
+```
+
+Skipping the trust step gets you error `0x800B010A`. It's one-time — releases share the same
+certificate. **64-bit only** — see the FAQ.
 
 **macOS** — download the `.dmg`, drag it to Applications. First launch is right-click → Open (the
 app isn't code-signed yet).

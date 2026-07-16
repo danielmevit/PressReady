@@ -69,8 +69,13 @@
   (case-insensitive) that is the *same file*: the script overwrote the binary and then
   exec'd itself forever. CI's ext4 is case-sensitive, so it would never have caught it. The
   build now hard-fails if the output binary is under 1 MB.
-- MSIX build needs a Windows 10 SDK; `certs/` (signing keys) is gitignored — the first run of
-  `packaging\windows\build.ps1` self-signs. Trust the cert once via elevated PowerShell.
+- MSIX build needs a Windows 10 SDK; `certs/` (signing keys) is gitignored. **CI must sign every
+  release with the same certificate**: the stable PFX lives in the repo secrets
+  `PRESSREADY_CERT_PFX_B64` / `PRESSREADY_CERT_PASSWORD` (created 2026-07-16, CN=PressReadyTeam,
+  thumbprint 44ED60F6..., expires 2031; the private copy is in local `certs/`). Without the
+  secret, `build.ps1` mints a per-run throwaway — that's how the first 0.3.0 MSIX shipped signed
+  by a cert that died with the runner, giving every installer 0x800B010A. Users trust
+  `PressReady-msix-signing.cer` (attached to each release) once, into LocalMachine\TrustedPeople.
 - MSIX needs a **four-part** version and refuses to install over a newer one. `__version__`
   is three parts and the script appends `.0`. The 0.2.0 release was published in February as
   **v2.0.0** and only the tag was renumbered — its MSIX still declares `2.0.0.0` inside, which
