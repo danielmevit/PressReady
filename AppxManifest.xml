@@ -16,7 +16,7 @@
     <DisplayName>Laydown</DisplayName>
     <PublisherDisplayName>Laydown Team</PublisherDisplayName>
     <Logo>assets\icons\msix\StoreLogo.png</Logo>
-    <Description>Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks</Description>
+    <Description>Lay PDF pages out on the press sheet — n-up, booklets, printer marks, trim and bleed. Free, offline, open source.</Description>
   </Properties>
 
   <Dependencies>
@@ -34,7 +34,7 @@
 
       <uap:VisualElements
         DisplayName="Laydown"
-        Description="Professional PDF Imposition Tool"
+        Description="PDF imposition for print"
         BackgroundColor="#1e1e1e"
         Square150x150Logo="assets\icons\msix\Square150x150Logo.png"
         Square44x44Logo="assets\icons\msix\Square44x44Logo.png" />
