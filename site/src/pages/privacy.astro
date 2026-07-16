@@ -1,0 +1,191 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const title = "Privacy — Laydown";
+const description =
+  "Laydown runs entirely on your device. It has no network code and collects, stores or transmits no personal data.";
+const updated = "16 July 2026";
+const repo = "https://github.com/danielmevit/laydown";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}/assets/icon_32.png`} />
+    <link rel="icon" type="image/png" sizes="256x256" href={`${base}/assets/icon_256.png`} />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://danielmevit.github.io/laydown/privacy/" />
+
+    <style is:global>
+      :root {
+        --bg: #0a0a0a;
+        --bg-soft: #101010;
+        --card: #151515;
+        --text: #c8c6c3;
+        --heading: #ffffff;
+        --muted: #8a8784;
+        --border: #2a2724;
+        --accent: #d07b24;
+        --accent-hi: #e8912f;
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent-hi); }
+      .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+
+      nav {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.1rem 0;
+      }
+      .brand {
+        display: flex; align-items: center; gap: 0.6rem;
+        font-weight: 700; color: var(--heading); text-decoration: none; font-size: 1.15rem;
+      }
+      .brand .glyph {
+        width: 26px; height: 26px; border-radius: 5px;
+        background: linear-gradient(150deg, var(--accent-hi), #a8631c);
+        position: relative; flex: none;
+      }
+      .brand .glyph::after {
+        content: ""; position: absolute; inset: 6px 6px auto 6px; height: 2px;
+        background: rgba(255, 255, 255, 0.85); box-shadow: 0 5px 0 rgba(255,255,255,.55);
+      }
+      nav a.back { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+      nav a.back:hover { color: var(--heading); }
+
+      main { padding: 1.5rem 0 4rem; }
+      h1 { color: var(--heading); font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 1rem 0 0.3rem; }
+      .updated { color: var(--muted); font-size: 0.9rem; margin: 0 0 2rem; }
+      h2 { color: var(--heading); font-size: 1.2rem; margin: 2.2rem 0 0.5rem; }
+      p { margin: 0.6rem 0; }
+      ul { margin: 0.6rem 0; padding-left: 1.2rem; }
+      li { margin: 0.3rem 0; }
+      .lede {
+        background: var(--card); border: 1px solid var(--border);
+        border-left: 3px solid var(--accent); border-radius: var(--radius);
+        padding: 1.1rem 1.3rem; margin: 0 0 1.5rem; color: var(--heading);
+      }
+      code {
+        background: #1c1a18; border: 1px solid var(--border);
+        border-radius: 5px; padding: 1px 6px; font-size: 0.9em; color: var(--text);
+      }
+      footer {
+        border-top: 1px solid var(--border); padding: 1.6rem 0 3rem;
+        color: var(--muted); font-size: 0.88rem;
+      }
+      footer a { color: var(--muted); }
+      footer a:hover { color: var(--heading); }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <nav>
+        <a class="brand" href={`${base}/`}>
+          <span class="glyph"></span> Laydown
+        </a>
+        <a class="back" href={`${base}/`}>&larr; Back to Laydown</a>
+      </nav>
+
+      <main>
+        <h1>Privacy</h1>
+        <p class="updated">Last updated {updated}</p>
+
+        <p class="lede">
+          Laydown runs entirely on your own computer. It has no network code, no analytics
+          and no accounts. It does not collect, store or transmit any personal data — not to
+          us, not to anyone. There is nothing to opt out of, because there is nothing being
+          gathered.
+        </p>
+
+        <h2>What Laydown does with your files</h2>
+        <p>
+          Laydown opens a PDF you choose, arranges its pages onto a press sheet, and writes a
+          new PDF where you tell it to. Your documents are read from and written to your own
+          disk, and nowhere else. They are never uploaded, and the app makes no internet
+          connection while it works — or at any other time.
+        </p>
+
+        <h2>What is stored on your device</h2>
+        <p>The only things Laydown keeps are the preferences you set yourself:</p>
+        <ul>
+          <li>Your recent-files list and window preferences, in the Windows registry under
+            <code>HKCU\Software\Laydown</code> (macOS and Linux use the platform's standard
+            per-user settings location).</li>
+          <li>Any imposition <em>presets</em> you save — plain files you place where you
+            choose.</li>
+        </ul>
+        <p>
+          All of this lives on your machine, under your user account. It is never sent
+          anywhere. Uninstalling the app, or clearing the recent-files list from within it,
+          removes this information.
+        </p>
+
+        <h2>No tracking, no third parties</h2>
+        <p>
+          There is no telemetry, no crash reporting, no advertising, and no third-party
+          services embedded in the application. The app does not know who you are and makes no
+          attempt to find out.
+        </p>
+
+        <h2>This website</h2>
+        <p>
+          This site is a set of static pages hosted on GitHub Pages. It sets no cookies and
+          runs no analytics of its own. It loads the Inter typeface from Google Fonts, which
+          may receive your IP address as part of serving those font files — a standard part of
+          how web fonts work. If you would rather avoid even that, a browser extension that
+          blocks external fonts prevents it, with no effect on the app itself.
+        </p>
+
+        <h2>Children</h2>
+        <p>
+          Laydown is a general-purpose tool for print work. It is not directed at children and
+          collects no information from anyone, including children.
+        </p>
+
+        <h2>Changes to this policy</h2>
+        <p>
+          If this policy ever changes, the new version will be posted on this page with an
+          updated date above. Because the app collects nothing, we do not expect the substance
+          to change.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+          Questions are welcome on the project's
+          <a href={`${repo}/issues`}>issue tracker</a>. Laydown is free, open-source software
+          (AGPL-3.0); the full source is at <a href={repo}>github.com/danielmevit/laydown</a>,
+          so anything stated here can be checked against the code.
+        </p>
+      </main>
+
+      <footer>
+        &copy; 2026 <a href="https://github.com/danielmevit">Daniel Mevit</a> &middot; Made by
+        <a href="https://damt.xyz">damt.xyz</a> &middot;
+        <a href={`${base}/`}>Home</a>
+      </footer>
+    </div>
+  </body>
+</html>
