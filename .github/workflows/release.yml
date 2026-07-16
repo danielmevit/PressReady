@@ -57,12 +57,18 @@ jobs:
       # half dies with the runner — that is exactly the 0x800B010A users hit on the
       # first 0.3.0 MSIX.
       - name: Restore the MSIX signing certificate
-        if: ${{ secrets.PRESSREADY_CERT_PFX_B64 != '' }}
         env:
           PFX_B64: ${{ secrets.PRESSREADY_CERT_PFX_B64 }}
         run: |
+          # (the secrets context is not allowed in a step-level `if:`, so the
+          # presence check lives here instead)
+          if (-not $env:PFX_B64) {
+            Write-Host "No signing secret available - build.ps1 will mint a throwaway cert"
+            exit 0
+          }
           New-Item -ItemType Directory -Force certs | Out-Null
           [IO.File]::WriteAllBytes("$PWD\certs\PressReady.pfx", [Convert]::FromBase64String($env:PFX_B64))
+          Write-Host "Stable signing certificate restored"
 
       - name: Build portable ZIP + MSIX
         run: powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
