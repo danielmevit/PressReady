@@ -47,7 +47,7 @@ jobs:
         run: pytest -q
 
       - name: Smoke gate
-        run: python -m pressready --smoke
+        run: python -m laydown --smoke
         env:
           QT_QPA_PLATFORM: offscreen
 
@@ -58,7 +58,7 @@ jobs:
       # first 0.3.0 MSIX.
       - name: Restore the MSIX signing certificate
         env:
-          PFX_B64: ${{ secrets.PRESSREADY_CERT_PFX_B64 }}
+          PFX_B64: ${{ secrets.LAYDOWN_CERT_PFX_B64 }}
         run: |
           # (the secrets context is not allowed in a step-level `if:`, so the
           # presence check lives here instead)
@@ -67,21 +67,21 @@ jobs:
             exit 0
           }
           New-Item -ItemType Directory -Force certs | Out-Null
-          [IO.File]::WriteAllBytes("$PWD\certs\PressReady.pfx", [Convert]::FromBase64String($env:PFX_B64))
+          [IO.File]::WriteAllBytes("$PWD\certs\Laydown.pfx", [Convert]::FromBase64String($env:PFX_B64))
           Write-Host "Stable signing certificate restored"
 
       - name: Build portable ZIP + MSIX
         run: powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
         env:
-          PRESSREADY_CERT_PASSWORD: ${{ secrets.PRESSREADY_CERT_PASSWORD }}
+          LAYDOWN_CERT_PASSWORD: ${{ secrets.LAYDOWN_CERT_PASSWORD }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pressready-windows-x64
+          name: laydown-windows-x64
           path: |
-            dist/PressReady-*-windows-*-portable.zip
-            dist/PressReady-*-windows-x64.msix
-            dist/PressReady-msix-signing.cer
+            dist/Laydown-*-windows-*-portable.zip
+            dist/Laydown-*-windows-x64.msix
+            dist/Laydown-msix-signing.cer
           if-no-files-found: error
 
 
@@ -110,20 +110,20 @@ jobs:
         run: xvfb-run -a pytest -q
 
       - name: Smoke gate
-        run: xvfb-run -a python -m pressready --smoke
+        run: xvfb-run -a python -m laydown --smoke
 
       - name: Build tar.gz
         run: bash packaging/linux/build.sh
 
       - name: Smoke gate on the built bundle
         run: |
-          tar -xzf dist/PressReady-*-linux-x86_64.tar.gz -C /tmp
-          xvfb-run -a /tmp/PressReady-*-linux-x86_64/PressReady --smoke
+          tar -xzf dist/Laydown-*-linux-x86_64.tar.gz -C /tmp
+          xvfb-run -a /tmp/Laydown-*-linux-x86_64/Laydown --smoke
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pressready-linux
-          path: dist/PressReady-*-linux-x86_64.tar.gz
+          name: laydown-linux
+          path: dist/Laydown-*-linux-x86_64.tar.gz
           if-no-files-found: error
 
 
@@ -160,15 +160,15 @@ jobs:
           QT_QPA_PLATFORM: offscreen
 
       - name: Smoke gate
-        run: python -m pressready --smoke
+        run: python -m laydown --smoke
 
       - name: Build .dmg
         run: bash packaging/macos/build.sh
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pressready-macos-${{ matrix.arch }}
-          path: dist/PressReady-*-macos-*.dmg
+          name: laydown-macos-${{ matrix.arch }}
+          path: dist/Laydown-*-macos-*.dmg
           if-no-files-found: error
 
   release:
@@ -196,7 +196,7 @@ jobs:
           body: |
             PDF imposition for print — lay your pages out on the press sheet.
 
-            **Windows, no setup** — the `-portable.zip`: unzip, run `PressReady.exe`
+            **Windows, no setup** — the `-portable.zip`: unzip, run `Laydown.exe`
             (SmartScreen will warn once: **More info → Run anyway**). 64-bit only
             (PyQt6 ships no 32-bit Windows packages).
 
@@ -205,20 +205,21 @@ jobs:
             time you need one elevated-PowerShell moment in your download folder:
 
             ```powershell
-            Import-Certificate -FilePath .\PressReady-msix-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-            Add-AppxPackage (Get-Item .\PressReady-*-windows-x64.msix)
+            Import-Certificate -FilePath .\Laydown-msix-signing.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+            Add-AppxPackage (Get-Item .\Laydown-*-windows-x64.msix)
             ```
 
             That trust is one-time — future releases are signed with the same
             certificate. (Skipping the first line gets you error 0x800B010A.)
 
             **macOS** — `.dmg`, drag to Applications. First launch: right-click → Open.
-            **Linux** — extract the `.tar.gz` and run `./PressReady`. No Python needed.
+            **Linux** — extract the `.tar.gz` and run `./Laydown`. No Python needed.
 
-            What changed is in [CHANGELOG.md](https://github.com/danielmevit/pressready/blob/main/CHANGELOG.md).
-            The site is at https://danielmevit.github.io/pressready/.
+            What changed is in [CHANGELOG.md](https://github.com/danielmevit/laydown/blob/main/CHANGELOG.md).
+            The site is at https://danielmevit.github.io/laydown/.
 
-            If you have the February build (published then as v2.0.0) installed, remove
-            it first — its MSIX declares 2.0.0.0 internally and Windows will not install
-            an older version over a newer one:
-            `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage`
+            **Upgrading from PressReady?** This app was called PressReady up to 0.3.0
+            (renamed to avoid clashing with Fujifilm's product of the same name). To
+            Windows the old install is a different app, so remove it once:
+            `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage` — and the
+            certificate trust starts fresh too, hence the Import-Certificate step above.

@@ -25,19 +25,19 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QWidget,
 )
 
-from pressready import __version__
-from pressready.engine.data_model import LayoutType, Project
-from pressready.engine.impose import impose
-from pressready.engine.utils import Unit
-from pressready.ui import theme as t
-from pressready.ui.help import tutorials_html
-from pressready.ui.marks_tab import MarksTab
-from pressready.ui.panel import SchemaTab, ValueStore
-from pressready.ui.preprocessors_tab import PreprocessorsTab
-from pressready.ui.preview_panel import SheetCanvas
-from pressready.ui.schema import SCHEMA
+from laydown import __version__
+from laydown.engine.data_model import LayoutType, Project
+from laydown.engine.impose import impose
+from laydown.engine.utils import Unit
+from laydown.ui import theme as t
+from laydown.ui.help import tutorials_html
+from laydown.ui.marks_tab import MarksTab
+from laydown.ui.panel import SchemaTab, ValueStore
+from laydown.ui.preprocessors_tab import PreprocessorsTab
+from laydown.ui.preview_panel import SheetCanvas
+from laydown.ui.schema import SCHEMA
 
-_APP_TITLE = "PressReady"
+_APP_TITLE = "Laydown"
 _MAX_RECENT = 8
 _ICON_SZ = 22
 _TAB_SZ = 24
@@ -244,7 +244,7 @@ class _Cancelled(Exception):
 class _TutorialsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("PressReady — Tutorials & Reference")
+        self.setWindowTitle("Laydown — Tutorials & Reference")
         self.resize(760, 640)
         column = QVBoxLayout(self)
         browser = QTextBrowser()
@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
         self._findings: list = []
         self._recent: list[str] = []
         self._progress: Optional[QProgressDialog] = None
-        self._settings = QSettings("PressReady", "PressReady2")
+        self._settings = QSettings("Laydown", "Laydown")
 
         self._store = ValueStore(self)
         self._store.changed.connect(self._on_values_changed)
@@ -470,7 +470,7 @@ class MainWindow(QMainWindow):
         return self._preflight_bar
 
     def _run_preflight(self):
-        from pressready.engine.preflight import Severity, preflight
+        from laydown.engine.preflight import Severity, preflight
 
         self._findings = []
         if self._source_path:
@@ -751,10 +751,10 @@ class MainWindow(QMainWindow):
 
     def _on_save_preset(self):
         path, _ = QFileDialog.getSaveFileName(
-            self, "Save Preset", "preset.pressready.json", "PressReady Preset (*.json)")
+            self, "Save Preset", "preset.laydown.json", "Laydown Preset (*.json)")
         if not path:
             return
-        from pressready.ui.presets import save_preset
+        from laydown.ui.presets import save_preset
         try:
             save_preset(path, self._store.values())
             self._status.showMessage(f"Preset saved → {os.path.basename(path)}")
@@ -763,10 +763,10 @@ class MainWindow(QMainWindow):
 
     def _on_load_preset(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Load Preset", "", "PressReady Preset (*.json);;All Files (*)")
+            self, "Load Preset", "", "Laydown Preset (*.json);;All Files (*)")
         if not path:
             return
-        from pressready.ui.presets import load_preset
+        from laydown.ui.presets import load_preset
         try:
             self._store.load(load_preset(path))
             self._rebuild_collection_editors()
@@ -776,7 +776,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Could not load preset", str(exc))
 
     def _on_reset_all(self):
-        from pressready.ui.schema import defaults
+        from laydown.ui.schema import defaults
         values = defaults()
         values["preprocessors"] = []
         values["marks"] = []
@@ -863,8 +863,8 @@ class MainWindow(QMainWindow):
 
     def _on_about(self):
         QMessageBox.about(
-            self, "About PressReady",
-            f"<h2 style='color:{t.ACCENT}'>PressReady {__version__}</h2>"
+            self, "About Laydown",
+            f"<h2 style='color:{t.ACCENT}'>Laydown {__version__}</h2>"
             "<p>PDF imposition for commercial printing.</p>"
             "<p>Built with Python, PyQt6 and PyMuPDF. Imposition is vector: pages are "
             "embedded, never rasterized.</p>"

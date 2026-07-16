@@ -1,6 +1,6 @@
-# Design system — PressReady
+# Design system — Laydown
 
-Every colour, radius, size and the whole global stylesheet live in **`pressready/ui/theme.py`**.
+Every colour, radius, size and the whole global stylesheet live in **`laydown/ui/theme.py`**.
 Nothing else defines a colour. There are no .qss files and no styling assets.
 The visual language follows the Toolcraft study — see `REFERENCE_STUDY.md` §2.
 

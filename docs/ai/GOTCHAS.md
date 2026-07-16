@@ -8,11 +8,11 @@
   `framer-demo/node_modules`, `dist/`, `build/`) on a slow /mnt mount. Prefer
   `git status -- <path>` or `git ls-files` when possible.
 - **Showing the GUI needs Windows Python**, but it can be *constructed* headless in WSL:
-  `QT_QPA_PLATFORM=offscreen python -m pressready --smoke` builds the real MainWindow and
+  `QT_QPA_PLATFORM=offscreen python -m laydown --smoke` builds the real MainWindow and
   drives a load. The Windows-only calls (`ctypes.windll`, `os.startfile`) live in
   `run_gui()`/menu actions, not at import, so UI logic is testable from WSL.
-- **Test venv (WSL):** `~/.venvs/pressready` (PyMuPDF + PyQt6 + pytest). D: has no room for
-  it, so it lives on the WSL disk: `~/.venvs/pressready/bin/python -m pytest`.
+- **Test venv (WSL):** `~/.venvs/laydown` (PyMuPDF + PyQt6 + pytest). D: has no room for
+  it, so it lives on the WSL disk: `~/.venvs/laydown/bin/python -m pytest`.
 
 ## PyMuPDF facts worth not re-deriving
 - **Box getters/setters use PyMuPDF's top-left origin**, the same space as `page.rect` —
@@ -65,22 +65,27 @@
   `.github/workflows/release.yml`. You cannot produce the macOS or 32-bit Windows build
   from this machine; tag a version (or run the workflow by hand) and let CI do it.
 - **Never name a build file a case-variant of another.** `packaging/linux/build.sh` used to
-  write a launcher called `pressready` beside the `PressReady` binary. On `/mnt/d`
+  write a launcher called `laydown` beside the `Laydown` binary. On `/mnt/d`
   (case-insensitive) that is the *same file*: the script overwrote the binary and then
   exec'd itself forever. CI's ext4 is case-sensitive, so it would never have caught it. The
   build now hard-fails if the output binary is under 1 MB.
 - MSIX build needs a Windows 10 SDK; `certs/` (signing keys) is gitignored. **CI must sign every
   release with the same certificate**: the stable PFX lives in the repo secrets
-  `PRESSREADY_CERT_PFX_B64` / `PRESSREADY_CERT_PASSWORD` (created 2026-07-16, CN=PressReadyTeam,
-  thumbprint 44ED60F6..., expires 2031; the private copy is in local `certs/`). Without the
-  secret, `build.ps1` mints a per-run throwaway — that's how the first 0.3.0 MSIX shipped signed
-  by a cert that died with the runner, giving every installer 0x800B010A. Users trust
-  `PressReady-msix-signing.cer` (attached to each release) once, into LocalMachine\TrustedPeople.
+  `LAYDOWN_CERT_PFX_B64` / `LAYDOWN_CERT_PASSWORD` (created 2026-07-16, CN=LaydownTeam,
+  thumbprint 2D87584C..., expires 2031; private copy in local `certs/Laydown.pfx` +
+  `laydown-pfx-password.txt`). The certificate subject must equal the manifest Publisher, so
+  the rename forced a new cert — the old PressReady one (44ED60F6...) signs nothing anymore.
+  Without the secret, `build.ps1` mints a per-run throwaway — that's how the first 0.3.0 MSIX
+  shipped signed by a cert that died with the runner, giving every installer 0x800B010A. Users trust
+  `Laydown-msix-signing.cer` (attached to each release) once, into LocalMachine\TrustedPeople.
 - MSIX needs a **four-part** version and refuses to install over a newer one. `__version__`
-  is three parts and the script appends `.0`. The 0.2.0 release was published in February as
-  **v2.0.0** and only the tag was renumbered — its MSIX still declares `2.0.0.0` inside, which
-  no rename can change. So an existing install of it blocks 0.3.0 and must be removed first:
-  `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage`.
+  is three parts and the script appends `.0`.
+- **The app was PressReady until 0.3.0** (renamed — Fujifilm ships "Revoria XMF PressReady" in
+  the same industry). To Windows, `PressReadyTeam.PressReady` and `LaydownTeam.Laydown` are
+  unrelated apps: old installs (February's v2.0.0-numbered MSIX *and* 0.3.0) don't upgrade,
+  they linger. Remove them with `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage`
+  — keep that OLD identity string; it is not a stale name to "fix". The old PressReady cert
+  trust does not cover Laydown's cert either.
 - PyInstaller frozen mode resolves icons via `sys._MEIPASS` (`app_icon()` in
   `ui/main_window.py`) — test icon changes in a frozen build, not just from source.
 - The site lives in `site/` (Astro) and deploys **from `main`**, not `dev`.

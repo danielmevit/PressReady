@@ -13,7 +13,7 @@ from typing import List
 
 import fitz
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     PreprocessorStep,
     PreprocessorType,
     RotateAngle,

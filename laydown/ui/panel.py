@@ -19,14 +19,14 @@ from PyQt6.QtWidgets import (
     QSpinBox, QVBoxLayout, QWidget,
 )
 
-from pressready.engine.capabilities import assign
-from pressready.engine.data_model import Project
-from pressready.engine.utils import Unit
-from pressready.ui import theme as t
-from pressready.ui.components import (
+from laydown.engine.capabilities import assign
+from laydown.engine.data_model import Project
+from laydown.engine.utils import Unit
+from laydown.ui import theme as t
+from laydown.ui.components import (
     FieldRow, SectionHeader, Segmented, Switch, divider,
 )
-from pressready.ui.schema import (
+from laydown.ui.schema import (
     SCHEMA, Control, ControlType, Section, Tab, all_controls, defaults, is_length,
     is_visible,
 )

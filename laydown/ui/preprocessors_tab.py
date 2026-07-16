@@ -7,10 +7,10 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     PreprocessorStep, PreprocessorType, RotateAngle,
 )
-from pressready.ui import theme as t
+from laydown.ui import theme as t
 
 
 _AVAILABLE = [

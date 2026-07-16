@@ -1,4 +1,4 @@
-# Roadmap — PressReady
+# Roadmap — Laydown
 
 The plan. Grounded in `docs/ai/REFERENCE_STUDY.md` (Imposition Wizard 3 + Toolcraft) and a full
 read of the code on 2026-07-14. Phases are ordered so each one is verifiable before the next
@@ -20,7 +20,7 @@ starts (`_refs/ai-full-build-recipe.md` §4). Sizes: **S** ≈ a session, **M** 
 - **0.3.0 released** (2026-07-15) — Windows x64 (MSIX + portable), macOS arm64 + Intel (.dmg),
   Linux x86_64 (tar.gz), all built by CI on the tag with tests and `--smoke` gating each
   platform and a single publish job so a release is complete or absent. Website live at
-  <https://danielmevit.github.io/pressready/>. The February v2.0.0 release was renumbered
+  <https://danielmevit.github.io/laydown/>. The February v2.0.0 release was renumbered
   v0.2.0. No 32-bit Windows build — PyQt6 ships no win32 wheel (see GOTCHAS).
 
 ## Not done from the original plan (deliberately)
@@ -34,7 +34,7 @@ starts (`_refs/ai-full-build-recipe.md` §4). Sizes: **S** ≈ a session, **M** 
 
 ## The one-paragraph version (as diagnosed 2026-07-14, now addressed)
 
-PressReady's engine was small, clean, and genuinely vector-true. Its problem was never code
+Laydown's engine was small, clean, and genuinely vector-true. Its problem was never code
 quality — it was that **nothing verified the output and the UI promised things the engine
 didn't do**. The Layout tab collected booklet modes, right-to-left, fillers, signatures and
 page creep that `impose.py` silently dropped on the floor; 9 of 12 preprocessors didn't
@@ -61,7 +61,7 @@ Everything after this changes imposition output. Without a harness we'd be guess
   geometry — cells inside sheet-minus-margins, no overlap, gutters honoured; determinism — same
   input, byte-identical output; **culture-invariance — run one test under `de_DE`** (comma decimals
   silently corrupt PDF number syntax).
-- **`python -m pressready --smoke`** — impose a bundled sample headless, exit 0/1, so the full
+- **`python -m laydown --smoke`** — impose a bundled sample headless, exit 0/1, so the full
   stack is verifiable without eyes and the build script can gate on it (recipe §4).
 - **Fix under cover of the new tests:** `impose()` leaks `src_doc` on any exception (`try/finally`);
   `_reorder` swallows bad expressions *and* silently drops pages not in a partial list (`doc.select`)
@@ -74,7 +74,7 @@ Everything after this changes imposition output. Without a harness we'd be guess
 
 ## Phase 2 — Box-aware imposition · **M** · correctness for real press PDFs
 `show_pdf_page` is called without `clip`, so **every placement uses the source MediaBox**. Press-ready
-PDFs carry TrimBox/BleedBox — exactly PressReady's target user — and for those the tool currently
+PDFs carry TrimBox/BleedBox — exactly Laydown's target user — and for those the tool currently
 images the wrong area and puts crop marks in the wrong place. IW has had box handling since forever
 (`bleedBoxSize`, `Bleeds Override`); this is table stakes, not a feature.
 
@@ -140,7 +140,7 @@ Each item lands with a bench test, and only then does its schema control come ba
   large feature gain.
 
 ## Phase 6 — Marks, units, preflight · **M**
-- **Units: mm / cm / in / pt.** IW ships all four; PressReady is mm-only, which is awkward for the
+- **Units: mm / cm / in / pt.** IW ships all four; Laydown is mm-only, which is awkward for the
   Letter/Tabloid users it already has presets for. Cheap — the model is already mm-internally.
 - **Marks:** gap crop, perforation, angle, colour bar, and **custom-mark PDFs** — IW's `Placeholders/`
   folder reveals custom marks are just user PDFs stamped by rule, which the existing `show_pdf_page`
@@ -162,7 +162,7 @@ Each item lands with a bench test, and only then does its schema control come ba
   minutes) · decide `framer-demo/`'s home · delete the untracked `_legacy/` leftover.
 
 ## Not doing (and why)
-- **Rewriting as a Toolcraft web app.** Toolcraft is React/Vite; PressReady is a shipped desktop
+- **Rewriting as a Toolcraft web app.** Toolcraft is React/Vite; Laydown is a shipped desktop
   tool whose value *is* the PyMuPDF vector engine and MSIX packaging. Port the design language,
   keep the stack. (Recorded in `docs/ai/DECISIONS.md`.)
 - **Cloning IW's feature list.** It's the source of the promises the UI can't keep. Take its domain

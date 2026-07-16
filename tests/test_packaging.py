@@ -51,8 +51,8 @@ class TestPowerShellScripts:
     @pytest.mark.parametrize("script", powershell_scripts(), ids=lambda p: p.name)
     def test_reads_the_version_from_the_one_source(self, script):
         text = script.read_text(encoding="ascii")
-        assert "pressready.__version__" in text, (
-            f"{script.name} must read the version from pressready/__init__.py, not restate it"
+        assert "laydown.__version__" in text, (
+            f"{script.name} must read the version from laydown/__init__.py, not restate it"
         )
 
 

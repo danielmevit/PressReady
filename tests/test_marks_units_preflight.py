@@ -4,19 +4,19 @@ Phase 6 — units, the new mark types, and preflight.
 The mark set and the preflight idea both come from the Imposition Wizard study
 (docs/ai/REFERENCE_STUDY.md): its Placeholders/ folder revealed that a custom mark is
 just a PDF stamped by rule, and it has shipped a preflight dashboard for years while
-PressReady only reported problems by raising at export time.
+Laydown only reported problems by raising at export time.
 """
 
 import fitz
 import pytest
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     LayoutSettings, LayoutType, MarkItem, MarkType, Orientation, Project,
     SheetSettings, SourceBox, SourceSettings,
 )
-from pressready.engine.impose import impose
-from pressready.engine.preflight import Severity, preflight
-from pressready.engine.utils import Unit, mm_to_pt, pt_to_mm
+from laydown.engine.impose import impose
+from laydown.engine.preflight import Severity, preflight
+from laydown.engine.utils import Unit, mm_to_pt, pt_to_mm
 
 from tests.helpers import make_source_pdf, word_centers
 

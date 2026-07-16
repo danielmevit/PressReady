@@ -8,7 +8,7 @@ everything here. This file only handles what differs *per platform*: the icon fo
 and the macOS .app bundle.
 
 Run via the packaging scripts (packaging/<os>/build.*), not directly, so the version
-and output names come from pressready/__init__.py.
+and output names come from laydown/__init__.py.
 """
 
 import os
@@ -17,22 +17,22 @@ import sys
 from PyInstaller.utils.hooks import collect_submodules
 
 sys.path.insert(0, os.path.abspath("."))
-from pressready import __version__  # noqa: E402
+from laydown import __version__  # noqa: E402
 
 IS_WIN = sys.platform == "win32"
 IS_MAC = sys.platform == "darwin"
 
 # Windows wants .ico, macOS wants .icns, Linux ships the PNGs and uses a .desktop file.
 if IS_WIN:
-    icon = "assets/icons/pressready.ico"
+    icon = "assets/icons/laydown.ico"
 elif IS_MAC:
-    icon = "assets/icons/pressready.icns" if os.path.exists(
-        "assets/icons/pressready.icns") else None
+    icon = "assets/icons/laydown.icns" if os.path.exists(
+        "assets/icons/laydown.icns") else None
 else:
     icon = None
 
 a = Analysis(
-    ["pressready/__main__.py"],
+    ["laydown/__main__.py"],
     pathex=[],
     binaries=[],
     datas=[("assets/icons", "assets/icons")],
@@ -60,7 +60,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="PressReady",
+    name="Laydown",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -82,15 +82,15 @@ coll = COLLECT(
     strip=False,
     upx=IS_WIN,
     upx_exclude=[],
-    name="PressReady",
+    name="Laydown",
 )
 
 if IS_MAC:
     app = BUNDLE(
         coll,
-        name="PressReady.app",
+        name="Laydown.app",
         icon=icon,
-        bundle_identifier="xyz.damt.pressready",
+        bundle_identifier="xyz.damt.laydown",
         version=__version__,
         info_plist={
             "CFBundleShortVersionString": __version__,

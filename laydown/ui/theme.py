@@ -10,7 +10,7 @@ here in OKLCH — the space they were designed in, where equal lightness steps l
 equal — and converted to hex at import. Keep editing them in OKLCH; the conversion
 is exact and cheap.
 
-The accent stays PressReady orange rather than Toolcraft's blue: it is the product's
+The accent stays Laydown orange rather than Toolcraft's blue: it is the product's
 identity and is already baked into the app icon and MSIX tiles. What is borrowed is
 the structure, density and control anatomy, not the branding.
 """

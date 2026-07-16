@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pressready"
+name = "laydown"
 dynamic = ["version"]
 description = "Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks"
 readme = "README.md"
@@ -27,15 +27,15 @@ dev = [
 ]
 
 [project.scripts]
-pressready = "pressready.__main__:main"
+laydown = "laydown.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pressready*"]
+include = ["laydown*"]
 
-# Single source of truth for the version: pressready/__init__.py
+# Single source of truth for the version: laydown/__init__.py
 [tool.setuptools.dynamic]
-version = {attr = "pressready.__version__"}
+version = {attr = "laydown.__version__"}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

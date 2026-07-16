@@ -2,7 +2,7 @@
 Imposition engine — renders a sheet plan into an output PDF.
 
 Uses PyMuPDF show_pdf_page for vector-quality placement (zero rasterization).
-Layout decisions live in :mod:`pressready.engine.geometry`; this module only turns
+Layout decisions live in :mod:`laydown.engine.geometry`; this module only turns
 the plan it produces into pages.
 """
 
@@ -13,8 +13,8 @@ from typing import Callable, List, Optional, Tuple
 
 import fitz
 
-from pressready.engine.data_model import Project
-from pressready.engine.geometry import (
+from laydown.engine.data_model import Project
+from laydown.engine.geometry import (
     Sheet,
     booklet_page_order,  # re-exported: callers import it from here
     margins_pt,
@@ -23,9 +23,9 @@ from pressready.engine.geometry import (
     sheet_size_pt,
     source_boxes,
 )
-from pressready.engine.marks import draw_marks
-from pressready.engine.preprocessors import apply_preprocessors
-from pressready.engine.utils import parse_page_range
+from laydown.engine.marks import draw_marks
+from laydown.engine.preprocessors import apply_preprocessors
+from laydown.engine.utils import parse_page_range
 
 __all__ = ["impose", "impose_to_temp", "booklet_page_order", "ImposeResult", "PlacedPage"]
 
@@ -129,7 +129,7 @@ def _layout_info(project: Project, sheet: Sheet) -> str:
     preset = project.sheet.preset
     if sheet.side:
         return f"Booklet on {preset} — {sheet.side}"
-    from pressready.engine.geometry import grid_for
+    from laydown.engine.geometry import grid_for
     cols, rows = grid_for(project.layout)
     return f"{cols * rows}-Up on {preset}"
 

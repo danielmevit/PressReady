@@ -15,13 +15,13 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PyQt6.QtWidgets import QApplication
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     BookletMode, LayoutType, MarkItem, MarkType, Orientation, PreprocessorStep,
     PreprocessorType, Project, SourceBox,
 )
-from pressready.ui.panel import SchemaTab, ValueStore
-from pressready.ui.presets import load_preset, save_preset
-from pressready.ui.schema import SCHEMA, defaults
+from laydown.ui.panel import SchemaTab, ValueStore
+from laydown.ui.presets import load_preset, save_preset
+from laydown.ui.schema import SCHEMA, defaults
 
 
 @pytest.fixture(scope="module")
@@ -159,7 +159,7 @@ class TestPresets:
         path = str(tmp_path / "p.json")
         save_preset(path, store.values())
         text = open(path, encoding="utf-8").read()
-        assert '"application": "PressReady"' in text
+        assert '"application": "Laydown"' in text
         assert "TRIM" in text, "enums should be written by name, not as an opaque number"
 
     def test_unknown_keys_are_ignored(self, tmp_path):
@@ -175,13 +175,13 @@ class TestPresets:
         import json
         path = tmp_path / "p.json"
         path.write_text(json.dumps({"format": 99, "values": {}}))
-        with pytest.raises(ValueError, match="newer PressReady"):
+        with pytest.raises(ValueError, match="newer Laydown"):
             load_preset(str(path))
 
     def test_a_non_preset_is_refused(self, tmp_path):
         path = tmp_path / "p.json"
         path.write_text('{"hello": 1}')
-        with pytest.raises(ValueError, match="not a PressReady preset"):
+        with pytest.raises(ValueError, match="not a Laydown preset"):
             load_preset(str(path))
 
 
@@ -237,17 +237,17 @@ class TestCollectionEditors:
     """
 
     def test_marks_editor_starts_with_no_item_panel(self, app):
-        from pressready.ui.marks_tab import MarksTab
+        from laydown.ui.marks_tab import MarksTab
         editor = MarksTab()
         assert not editor._settings_group.isVisible()
 
     def test_preprocessors_editor_starts_with_no_item_panel(self, app):
-        from pressready.ui.preprocessors_tab import PreprocessorsTab
+        from laydown.ui.preprocessors_tab import PreprocessorsTab
         editor = PreprocessorsTab()
         assert not editor._settings_group.isVisible()
 
     def test_selecting_a_mark_reveals_its_settings(self, app):
-        from pressready.ui.marks_tab import MarksTab
+        from laydown.ui.marks_tab import MarksTab
         editor = MarksTab()
         editor.set_marks([MarkItem(mark_type=MarkType.CROP_MARKS)])
         editor._list.setCurrentRow(0)
@@ -255,7 +255,7 @@ class TestCollectionEditors:
 
     def test_browsing_for_mark_artwork_does_not_hide_the_settings(self, app, tmp_path, monkeypatch):
         from PyQt6.QtWidgets import QFileDialog
-        from pressready.ui.marks_tab import MarksTab
+        from laydown.ui.marks_tab import MarksTab
         art = tmp_path / "mark.pdf"
         art.write_bytes(b"%PDF-1.4")
         editor = MarksTab()
@@ -269,7 +269,7 @@ class TestCollectionEditors:
         assert editor.get_marks()[0].mark_pdf_path == str(art)
 
     def test_every_mark_type_is_offered(self, app):
-        from pressready.ui.marks_tab import MarksTab
+        from laydown.ui.marks_tab import MarksTab
         editor = MarksTab()
         offered = {editor._add_combo.itemData(i) for i in range(editor._add_combo.count())}
         assert offered == set(MarkType), "a mark the engine draws is not reachable from the UI"
@@ -361,7 +361,7 @@ class TestWidgetsFollowTheStore:
     def test_every_non_collection_control_is_bound(self, app, store):
         # If a control isn't in _bound it can never be resynced — which is exactly
         # how the segmented control got missed.
-        from pressready.ui.schema import ControlType
+        from laydown.ui.schema import ControlType
         for tab in SCHEMA:
             page = SchemaTab(tab, store)
             bound = set().union(*(s._bound.keys() for s in page.sections)) if page.sections else set()

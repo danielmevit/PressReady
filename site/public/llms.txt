@@ -1,12 +1,12 @@
-# PressReady
+# Laydown
 
 > Free, open-source PDF imposition for commercial printing. Lays PDF pages out on
 > press sheets — n-up, booklets, signatures, printer marks — on Windows, macOS and
 > Linux. Runs locally; nothing is uploaded.
 
-- Site: https://danielmevit.github.io/pressready/
-- Source: https://github.com/danielmevit/pressready
-- Downloads: https://github.com/danielmevit/pressready/releases
+- Site: https://danielmevit.github.io/laydown/
+- Source: https://github.com/danielmevit/laydown
+- Downloads: https://github.com/danielmevit/laydown/releases
 - License: AGPL-3.0-only. Free, no paid tier.
 - Author: Daniel Mevit (https://damt.xyz)
 

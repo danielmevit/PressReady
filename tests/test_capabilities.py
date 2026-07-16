@@ -15,11 +15,11 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from pressready.engine.capabilities import (
+from laydown.engine.capabilities import (
     HONOURED, NOT_IMPLEMENTED, model_paths, resolve, assign,
 )
-from pressready.engine.data_model import Project
-from pressready.ui.schema import (
+from laydown.engine.data_model import Project
+from laydown.ui.schema import (
     SCHEMA, ControlType, all_controls, all_sections, all_targets, defaults, is_visible,
 )
 
@@ -148,21 +148,21 @@ class TestVisibility:
                 )
 
     def test_booklet_controls_are_hidden_for_n_up(self):
-        from pressready.engine.data_model import LayoutType
+        from laydown.engine.data_model import LayoutType
         values = defaults()
         values["layout.layout_type"] = LayoutType.NUP
         booklet = next(s for s in all_sections() if s.title == "Booklet")
         assert not is_visible(booklet, values)
 
     def test_booklet_controls_appear_for_a_booklet(self):
-        from pressready.engine.data_model import LayoutType
+        from laydown.engine.data_model import LayoutType
         values = defaults()
         values["layout.layout_type"] = LayoutType.BOOKLET
         booklet = next(s for s in all_sections() if s.title == "Booklet")
         assert is_visible(booklet, values)
 
     def test_signature_size_only_shows_for_perfect_binding(self):
-        from pressready.engine.data_model import BookletMode
+        from laydown.engine.data_model import BookletMode
         values = defaults()
         control = next(c for c in all_controls() if c.target == "layout.signature_sheets")
 

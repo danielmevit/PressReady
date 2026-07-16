@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap rescap desktop">
 
   <Identity
-    Name="PressReadyTeam.PressReady"
+    Name="LaydownTeam.Laydown"
     Version="0.3.0.0"
-    Publisher="CN=PressReadyTeam"
+    Publisher="CN=LaydownTeam"
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>PressReady</DisplayName>
-    <PublisherDisplayName>PressReady Team</PublisherDisplayName>
+    <DisplayName>Laydown</DisplayName>
+    <PublisherDisplayName>Laydown Team</PublisherDisplayName>
     <Logo>assets\icons\msix\StoreLogo.png</Logo>
     <Description>Professional PDF Imposition Tool — N-Up, Booklet, Preprocessors, Marks</Description>
   </Properties>
@@ -28,12 +28,12 @@
   </Resources>
 
   <Applications>
-    <Application Id="PressReady"
-      Executable="PressReady.exe"
+    <Application Id="Laydown"
+      Executable="Laydown.exe"
       EntryPoint="Windows.FullTrustApplication">
 
       <uap:VisualElements
-        DisplayName="PressReady"
+        DisplayName="Laydown"
         Description="Professional PDF Imposition Tool"
         BackgroundColor="#1e1e1e"
         Square150x150Logo="assets\icons\msix\Square150x150Logo.png"

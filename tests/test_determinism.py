@@ -13,10 +13,10 @@ import os
 import fitz
 import pytest
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     Project, LayoutSettings, LayoutType, SheetSettings, Orientation,
 )
-from pressready.engine.impose import impose
+from laydown.engine.impose import impose
 
 
 def _project(src):

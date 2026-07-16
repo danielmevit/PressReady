@@ -9,12 +9,12 @@ the difference (ROADMAP.md Phase 1).
 import fitz
 import pytest
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     Project, LayoutSettings, LayoutType, SheetSettings, Orientation,
     PreprocessorStep, PreprocessorType, RotateAngle,
 )
-from pressready.engine.impose import impose
-from pressready.engine.preprocessors import apply_preprocessors
+from laydown.engine.impose import impose
+from laydown.engine.preprocessors import apply_preprocessors
 
 from tests.helpers import page_token, corner_token, word_centers
 

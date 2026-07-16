@@ -10,9 +10,9 @@ capability test already guarantees no control describes a setting the engine ign
 
 from html import escape
 
-from pressready import __version__
-from pressready.ui import theme as t
-from pressready.ui.schema import SCHEMA, ControlType
+from laydown import __version__
+from laydown.ui import theme as t
+from laydown.ui.schema import SCHEMA, ControlType
 
 
 def _control_rows(section) -> str:
@@ -61,7 +61,7 @@ i {{ color:{t.FG_MUTED}; }}
 .tip {{ background:{t.RAISED}; border-left:3px solid {t.ACCENT}; padding:8px 12px; margin:12px 0; }}
 </style></head><body>
 
-<h1>PressReady {escape(__version__)}</h1>
+<h1>Laydown {escape(__version__)}</h1>
 <p>Lay source pages out on press sheets. Imposition is vector — pages are embedded,
 never rasterized, so output quality always matches the source.</p>
 
@@ -75,7 +75,7 @@ separate drawing that might disagree.</div>
 
 <h2>Bleed and boxes</h2>
 <p>A press-ready PDF marks its finished page with a <b>trim box</b> and paints artwork past
-it to a <b>bleed box</b>. PressReady imposes the trim box by default, so what lands on the
+it to a <b>bleed box</b>. Laydown imposes the trim box by default, so what lands on the
 cell is the finished page. Files without boxes are unaffected: PDF makes the trim box fall
 back to the whole page. Set a <b>bleed</b> under Source to carry artwork past the cut line
 so a slightly off cut still lands on ink.</p>

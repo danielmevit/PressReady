@@ -1,4 +1,4 @@
-# Agent rules — PressReady
+# Agent rules — Laydown
 
 ## Reading ritual (start of every session)
 1. AGENTS.md — this file
@@ -26,7 +26,7 @@ work list. Don't start a second one.
 ## Workflow
 - Plan → implement → run → summarize in one go. Milestone-sized steps.
 - Each change: verify (engine tests run headless in WSL; UI needs Windows Python) + a CHANGELOG.md entry.
-- The engine (`pressready/engine/`) must stay Qt-free — that's what keeps it testable.
+- The engine (`laydown/engine/`) must stay Qt-free — that's what keeps it testable.
 
 ## Commit & push
 - Work on `dev`; merge to `main` only on an explicit release request (then tag `vX.Y.Z`).

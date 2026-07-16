@@ -18,9 +18,9 @@ from PyQt6.QtGui import QPixmap, QImage, QFont, QPainter, QPen, QColor
 
 import fitz
 
-from pressready.engine.data_model import Project
-from pressready.ui import theme as t
-from pressready.engine.impose import ImposeResult, impose_to_temp
+from laydown.engine.data_model import Project
+from laydown.ui import theme as t
+from laydown.engine.impose import ImposeResult, impose_to_temp
 
 MAGENTA = QColor(t.OVERLAY)
 

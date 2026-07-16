@@ -7,14 +7,14 @@ filler placement, signatures/perfect binding, and creep.
 import fitz
 import pytest
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     Project, LayoutSettings, LayoutType, SheetSettings, Orientation, BookletMode,
 )
-from pressready.engine.geometry import (
+from laydown.engine.geometry import (
     booklet_page_order, grid_for, padded_slots, signature_groups, creep_shift_pt,
 )
-from pressready.engine.impose import impose, impose_detailed
-from pressready.engine.utils import mm_to_pt
+from laydown.engine.impose import impose, impose_detailed
+from laydown.engine.utils import mm_to_pt
 
 from tests.helpers import page_token, corner_token, word_centers
 
@@ -102,7 +102,7 @@ class TestAutoRotate:
         # Asymmetric bleed under rotation: the margins must rotate with the artwork,
         # or the target no longer matches the clip's shape and the page is stretched.
         # Symmetric bleed hides this — it looks identical whichever way the mapping goes.
-        from pressready.engine.geometry import place_page
+        from laydown.engine.geometry import place_page
         cell = fitz.Rect(0, 0, 400, 200)        # wide cell, so turning genuinely wins
         place = fitz.Rect(20, 5, 120, 205)      # 100 × 200, tall
         clip = fitz.Rect(0, 0, 130, 210)        # left 20, top 5, right 10, bottom 5
@@ -239,7 +239,7 @@ class TestSignatures:
         project = a_project(src)
         project.layout = booklet_layout(
             booklet_mode=BookletMode.PERFECT_BOUND, signature_sheets=2)
-        from pressready.engine.geometry import sheet_plan
+        from laydown.engine.geometry import sheet_plan
         plan = sheet_plan(project, list(range(16)))
         assert [s.number for s in plan] == [1, 1, 2, 2, 3, 3, 4, 4]
         assert all(s.total == 4 for s in plan)

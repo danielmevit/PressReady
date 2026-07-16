@@ -7,8 +7,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal
 
-from pressready.engine.data_model import MarkItem, MarkType
-from pressready.ui import theme as t
+from laydown.engine.data_model import MarkItem, MarkType
+from laydown.ui import theme as t
 
 
 _AVAILABLE = list(MarkType)

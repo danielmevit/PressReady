@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Optional, Sequence, Tuple
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     BookletMode, LayoutType, Orientation, SourceBox, SHEET_PRESETS_MM,
 )
 

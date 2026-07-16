@@ -20,7 +20,7 @@ from typing import List, Optional, Tuple
 
 import fitz
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     BookletMode,
     LayoutSettings,
     LayoutType,
@@ -28,7 +28,7 @@ from pressready.engine.data_model import (
     SourceBox,
     SourceSettings,
 )
-from pressready.engine.utils import mm_to_pt
+from laydown.engine.utils import mm_to_pt
 
 
 # ── sheet-level geometry ─────────────────────────────

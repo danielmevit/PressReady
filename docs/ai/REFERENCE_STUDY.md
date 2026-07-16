@@ -10,7 +10,7 @@ not from imagination). Two references, two different jobs:
 
 **No code from either was copied.** IW is a proprietary Qt5/QML app; what's recorded below is
 its observable feature surface and architecture. Toolcraft is a React/Tailwind web stack —
-PressReady is PyQt6, so nothing is portable by copy anyway; only the *ideas* transfer.
+Laydown is PyQt6, so nothing is portable by copy anyway; only the *ideas* transfer.
 
 ---
 
@@ -20,15 +20,15 @@ PressReady is PyQt6, so nothing is portable by copy anyway; only the *ideas* tra
 QML control kit (`Button`, `ComboBox`, `NumericField`, `Slider`, `Title`) with a **`Theme.qml`
 singleton** holding the tokens. Entry: `qrc:/qml/MainWindow.qml`.
 
-**Its four tabs are PressReady's four tabs.** Verbatim from the binary:
+**Its four tabs are Laydown's four tabs.** Verbatim from the binary:
 ```
 readonly property variant tabs: ["InputPanel", "LayoutPanel", "SheetPanel", "MarksPanel"]
 ```
-PressReady v2's Preprocessors / Layout / Sheet / Marks is a direct lift of that structure, and
+Laydown v2's Preprocessors / Layout / Sheet / Marks is a direct lift of that structure, and
 its `data_model.py` enums are IW's feature list transcribed — which is why so many are
-unimplemented (see `GOTCHAS.md`). **IW is the source of the promises PressReady's UI makes.**
+unimplemented (see `GOTCHAS.md`). **IW is the source of the promises Laydown's UI makes.**
 
-| Area | IW ships | PressReady today |
+| Area | IW ships | Laydown today |
 |------|----------|------------------|
 | **Layout modes** | N-Up, Booklet, **Cut Stack**, **Dutch Cut**, **Step and Repeat**, Shuffle | N-Up (2/4 only), Booklet (saddle-stitch only) |
 | **N-Up grid** | Arbitrary `Rows` × `Columns` | Hardcoded 2×1 / 2×2 |
@@ -48,16 +48,16 @@ unimplemented (see `GOTCHAS.md`). **IW is the source of the promises PressReady'
 ### The two architecture insights worth stealing
 1. **A "custom mark" is just a PDF stamped onto the sheet.** The `Placeholders/*.pdf` files are
    the fallbacks shown when a user's mark PDF is missing — so color bars, star targets and
-   bull's-eyes are *user-supplied PDF assets placed by rule*, not drawing code. PressReady gets
+   bull's-eyes are *user-supplied PDF assets placed by rule*, not drawing code. Laydown gets
    this nearly free: `show_pdf_page` already does exactly that placement.
 2. **One engine, three front-ends** (GUI, `iwc` console, Acrobat plugin). Only possible because
-   the engine is UI-free — the same reason PressReady's engine bans Qt imports
+   the engine is UI-free — the same reason Laydown's engine bans Qt imports
    (`DECISIONS.md`). It validates the CLI/batch direction.
 
 ### What NOT to take from IW
 - **Shuffle** — IW's own UI calls it deprecated (`Shuffle jest przestarzały`).
 - **30+ barcode symbologies** — huge scope, thin value. One or two (Code128, DataMatrix) if ever.
-- **Licensing/subscription/registration machinery** — PressReady is AGPL-3.0.
+- **Licensing/subscription/registration machinery** — Laydown is AGPL-3.0.
 - **Its visual style** — that's Toolcraft's job below. IW is studied for *what*, not *how it looks*.
 
 ---
@@ -73,11 +73,11 @@ rules. The visual polish is downstream of one structural idea:
 `description`, `visibleWhen`. The runtime renders the panel, owns state, reset, undo/redo,
 persistence, and settings import/export. Nothing is hand-built per app.
 
-Consequences that matter to PressReady:
+Consequences that matter to Laydown:
 - **`visibleWhen`, never `disabled`.** Their rule, verbatim: *"Use `visibleWhen` for inactive
   product branches so the panel shows only usable controls. Do not use `disabled: true` or
   `disabledWhen` for generated product controls."* A section with no visible controls hides
-  itself. **This is precisely PressReady's biggest defect stated as a design law** — a control
+  itself. **This is precisely Laydown's biggest defect stated as a design law** — a control
   that can't do anything must not be on screen.
 - **Structure becomes testable.** `starterControlSectionInventory` (every control target appears
   exactly once, with the entity it edits and why it's grouped) plus `orderRole` make panel

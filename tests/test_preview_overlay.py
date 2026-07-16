@@ -14,12 +14,12 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from pressready.engine.data_model import (
+from laydown.engine.data_model import (
     Project, LayoutSettings, LayoutType, SheetSettings, Orientation,
     SourceSettings, SourceBox,
 )
-from pressready.engine.impose import impose_to_temp
-from pressready.ui.preview_panel import cells_from_result
+from laydown.engine.impose import impose_to_temp
+from laydown.ui.preview_panel import cells_from_result
 
 from tests.helpers import page_token, word_centers
 

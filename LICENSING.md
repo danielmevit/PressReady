@@ -2,7 +2,7 @@
 
 ## Project license
 
-**PressReady** is released under the [**GNU Affero General Public License v3.0 (AGPL-3.0)**](https://www.gnu.org/licenses/agpl-3.0.html). The full legal text is in [`LICENSE`](LICENSE). A short attribution file is in [`NOTICE`](NOTICE).
+**Laydown** is released under the [**GNU Affero General Public License v3.0 (AGPL-3.0)**](https://www.gnu.org/licenses/agpl-3.0.html). The full legal text is in [`LICENSE`](LICENSE). A short attribution file is in [`NOTICE`](NOTICE).
 
 SPDX identifier: **AGPL-3.0-only** (see `pyproject.toml`).
 
@@ -16,7 +16,7 @@ This is a summary only; **the `LICENSE` file is authoritative.** It is not legal
 
 ## No warranty; use at your own risk
 
-The software is provided **“as is”**, without warranty of any kind (express or implied), to the extent permitted by applicable law. **You use PressReady at your own risk.** The authors and contributors are not liable for any damage or loss arising from use—including incorrect imposition, misprinted jobs, or corrupted files. The complete disclaimer of warranty and limitation of liability is in the [`LICENSE`](LICENSE) file (GNU AGPL sections 15–17).
+The software is provided **“as is”**, without warranty of any kind (express or implied), to the extent permitted by applicable law. **You use Laydown at your own risk.** The authors and contributors are not liable for any damage or loss arising from use—including incorrect imposition, misprinted jobs, or corrupted files. The complete disclaimer of warranty and limitation of liability is in the [`LICENSE`](LICENSE) file (GNU AGPL sections 15–17).
 
 ## Third-party components
 

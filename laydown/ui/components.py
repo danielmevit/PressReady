@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QSizePolicy, QVBoxLayout, QWidget,
 )
 
-from pressready.ui import theme as t
+from laydown.ui import theme as t
 
 
 class Switch(QAbstractButton):

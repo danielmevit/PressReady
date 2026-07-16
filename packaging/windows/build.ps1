@@ -17,7 +17,7 @@
     Usage:
         powershell -ExecutionPolicy Bypass -File packaging\windows\build.ps1
         ... -SkipMsix        portable ZIP only
-        ... -SkipPyInstaller reuse an existing dist\PressReady
+        ... -SkipPyInstaller reuse an existing dist\Laydown
 #>
 param(
     [switch]$SkipPyInstaller,
@@ -30,44 +30,44 @@ Push-Location $root
 
 # -- version + arch: both discovered, never restated --
 $python = if ($env:PYTHON) { $env:PYTHON } else { "python" }
-$version = (& $python -c "import pressready; print(pressready.__version__)").Trim()
+$version = (& $python -c "import laydown; print(laydown.__version__)").Trim()
 $bits = (& $python -c "import struct; print(struct.calcsize('P') * 8)").Trim()
 $arch = if ($bits -eq "32") { "x86" } else { "x64" }
 $appVersion = "$version.0"   # MSIX wants four parts
 
 if ($version -notmatch '^\d+\.\d+\.\d+$') {
-    Write-Error "pressready/__init__.py must carry a three-part version (got '$version'); MSIX appends the fourth."
+    Write-Error "laydown/__init__.py must carry a three-part version (got '$version'); MSIX appends the fourth."
 }
 
-Write-Host "=== PressReady $version -- Windows $arch build ===" -ForegroundColor Cyan
+Write-Host "=== Laydown $version -- Windows $arch build ===" -ForegroundColor Cyan
 
 $outDir = "$root\dist"
 $stageDir = "$root\build\msix_stage"
-$portableName = "PressReady-$version-windows-$arch-portable"
+$portableName = "Laydown-$version-windows-$arch-portable"
 
 # -- 1. PyInstaller -----------------------------------
 if (-not $SkipPyInstaller) {
     Write-Host "`n--- PyInstaller ---" -ForegroundColor Cyan
-    & $python -m PyInstaller PressReady.spec --noconfirm --distpath dist --workpath build
+    & $python -m PyInstaller Laydown.spec --noconfirm --distpath dist --workpath build
     if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller failed" }
 }
-if (-not (Test-Path "$outDir\PressReady\PressReady.exe")) {
-    Write-Error "No bundle at dist\PressReady -- run without -SkipPyInstaller"
+if (-not (Test-Path "$outDir\Laydown\Laydown.exe")) {
+    Write-Error "No bundle at dist\Laydown -- run without -SkipPyInstaller"
 }
 
 # -- 2. Portable ZIP ----------------------------------
 Write-Host "`n--- Portable ZIP ---" -ForegroundColor Cyan
 $portableDir = "$outDir\$portableName"
 if (Test-Path $portableDir) { Remove-Item $portableDir -Recurse -Force }
-Copy-Item "$outDir\PressReady" $portableDir -Recurse
+Copy-Item "$outDir\Laydown" $portableDir -Recurse
 foreach ($doc in @("README.md", "LICENSE", "NOTICE")) {
     if (Test-Path "$root\$doc") { Copy-Item "$root\$doc" $portableDir }
 }
 @"
-PressReady $version -- portable ($arch)
+Laydown $version -- portable ($arch)
 
-Run PressReady.exe. Nothing is installed and nothing is written outside this
-folder except your own settings (in the registry under HKCU\Software\PressReady)
+Run Laydown.exe. Nothing is installed and nothing is written outside this
+folder except your own settings (in the registry under HKCU\Software\Laydown)
 and any PDFs you export.
 
 Windows may warn that the publisher is unknown: the binaries are unsigned.
@@ -100,7 +100,7 @@ Write-Host "`n--- MSIX (SDK $($sdk.Name)) ---" -ForegroundColor Cyan
 
 if (Test-Path $stageDir) { Remove-Item $stageDir -Recurse -Force }
 New-Item -ItemType Directory -Path $stageDir | Out-Null
-Copy-Item "$outDir\PressReady\*" $stageDir -Recurse
+Copy-Item "$outDir\Laydown\*" $stageDir -Recurse
 
 # Stamp the version into the staged manifest. It used to be copied verbatim, so the
 # MSIX took whatever the checked-in manifest said and bumping the build did nothing.
@@ -115,19 +115,19 @@ New-Item -ItemType Directory -Path "$stageDir\assets\icons\msix" -Force | Out-Nu
 Copy-Item "$root\assets\icons\msix\*" "$stageDir\assets\icons\msix\"
 
 # The signing certificate. Users must trust the SAME certificate across releases, so
-# CI restores a stable PFX from a repo secret (PRESSREADY_CERT_PFX_B64) before this
-# script runs; the password rides in PRESSREADY_CERT_PASSWORD. A per-run throwaway
+# CI restores a stable PFX from a repo secret (LAYDOWN_CERT_PFX_B64) before this
+# script runs; the password rides in LAYDOWN_CERT_PASSWORD. A per-run throwaway
 # cert is what shipped v0.3.0's first MSIX -- the .cer users needed to trust existed
 # only on a dead runner VM, so Windows refused the install with 0x800B010A.
 $certDir = "$root\certs"
-$pfxPath = "$certDir\PressReady.pfx"
-$cerPath = "$certDir\PressReady.cer"
-$pfxPassword = if ($env:PRESSREADY_CERT_PASSWORD) { $env:PRESSREADY_CERT_PASSWORD } else { "PressReady2026" }
+$pfxPath = "$certDir\Laydown.pfx"
+$cerPath = "$certDir\Laydown.cer"
+$pfxPassword = if ($env:LAYDOWN_CERT_PASSWORD) { $env:LAYDOWN_CERT_PASSWORD } else { "Laydown2026" }
 if (-not (Test-Path $pfxPath)) {
     Write-Host "Creating a self-signed certificate (first run, local builds only)" -ForegroundColor Yellow
     New-Item -ItemType Directory -Path $certDir -Force | Out-Null
-    $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=PressReadyTeam" `
-        -KeyUsage DigitalSignature -FriendlyName "PressReady" -CertStoreLocation "Cert:\CurrentUser\My" `
+    $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=LaydownTeam" `
+        -KeyUsage DigitalSignature -FriendlyName "Laydown" -CertStoreLocation "Cert:\CurrentUser\My" `
         -NotAfter (Get-Date).AddYears(5) `
         -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
     $pw = ConvertTo-SecureString -String $pfxPassword -Force -AsPlainText
@@ -141,7 +141,7 @@ if (-not (Test-Path $cerPath)) {
     Export-Certificate -Cert $pfxData.EndEntityCertificates[0] -FilePath $cerPath | Out-Null
 }
 
-$msixPath = "$outDir\PressReady-$version-windows-x64.msix"
+$msixPath = "$outDir\Laydown-$version-windows-x64.msix"
 if (Test-Path $msixPath) { Remove-Item $msixPath -Force }
 & $makeappx pack /d $stageDir /p $msixPath /o
 if ($LASTEXITCODE -ne 0) { Write-Error "makeappx failed" }
@@ -150,10 +150,10 @@ if ($LASTEXITCODE -ne 0) { Write-Error "signtool failed" }
 
 # Ship the public certificate beside the installer: trusting it once is the install
 # prerequisite, so it belongs on the release page, not in a doc nobody finds.
-Copy-Item $cerPath "$outDir\PressReady-msix-signing.cer"
+Copy-Item $cerPath "$outDir\Laydown-msix-signing.cer"
 
 Write-Host "[ok] $msixPath" -ForegroundColor Green
-Write-Host "[ok] $outDir\PressReady-msix-signing.cer (users trust this once)" -ForegroundColor Green
+Write-Host "[ok] $outDir\Laydown-msix-signing.cer (users trust this once)" -ForegroundColor Green
 Write-Host "`nTrust the certificate once (elevated):" -ForegroundColor Yellow
 Write-Host "  Import-Certificate -FilePath `"$cerPath`" -CertStoreLocation Cert:\LocalMachine\TrustedPeople"
 Pop-Location

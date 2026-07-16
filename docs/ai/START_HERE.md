@@ -1,14 +1,14 @@
-# START HERE — PressReady
+# START HERE — Laydown
 
 ## What this is
-PressReady — a desktop app for **PDF imposition** (laying out source pages on press sheets
+Laydown — a desktop app for **PDF imposition** (laying out source pages on press sheets
 for commercial printing). Python 3.10+, PyQt6 UI, PyMuPDF (fitz) engine. Runs on Windows,
-macOS and Linux. Current version **0.3.0**. License: AGPL-3.0-only.
+macOS and Linux. Current version **0.4.0**. License: AGPL-3.0-only.
 
 ## Current priority
-**0.3.0 is released** — <https://github.com/danielmevit/pressready/releases/tag/v0.3.0>,
-five files across Windows x64, macOS (arm64 + Intel) and Linux; the published Linux artifact
-was downloaded back and passes `--smoke`. Next work: `ROADMAP.md` backlog. All six planned
+**Renamed from PressReady to Laydown at 0.4.0** (Fujifilm ships "Revoria XMF PressReady" in
+this exact industry). Releases 0.2.0/0.3.0 on the release page carry the old name — history,
+don't rewrite them. Next work: `ROADMAP.md` backlog. All six planned
 phases landed (CHANGELOG.md has the detail); the plan was grounded in a study of Imposition
 Wizard 3 and Toolcraft — `docs/ai/REFERENCE_STUDY.md`.
 
@@ -23,16 +23,16 @@ Releasing: tag `vX.Y.Z` and `.github/workflows/release.yml` builds everything an
 once all platforms pass (no partial releases). The website deploys from `main`.
 
 ## How to run
-- **App:** `pip install -e .` then `python -m pressready`
+- **App:** `pip install -e .` then `python -m laydown`
 - **Tests:** `pip install -e ".[dev]"` then `pytest` — 243 of them, no display needed.
-  In WSL use the venv at `~/.venvs/pressready` (see GOTCHAS).
-- **Self-check:** `python -m pressready --smoke` — headless, end to end, exits 0/1.
+  In WSL use the venv at `~/.venvs/laydown` (see GOTCHAS).
+- **Self-check:** `python -m laydown --smoke` — headless, end to end, exits 0/1.
 - **Packaging:** `packaging/{windows,linux,macos}/` — each runs on its own OS.
 
 ## Layout of the work
-- `pressready/engine/` — data model, geometry, imposition, marks, preprocessors,
+- `laydown/engine/` — data model, geometry, imposition, marks, preprocessors,
   preflight, capabilities. **No Qt imports** — that's what makes it testable.
-- `pressready/ui/` — `schema.py` (what the panel offers), `panel.py` (renders it),
+- `laydown/ui/` — `schema.py` (what the panel offers), `panel.py` (renders it),
   `components.py`, `theme.py` (every colour), preview canvas.
 - `site/` — the Astro website. `packaging/` — the installers.
 - Everything else structural: ask CodeGraph (`codegraph explore "..."`), don't crawl.

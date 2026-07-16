@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://danielmevit.github.io/pressready/sitemap.xml
+Sitemap: https://danielmevit.github.io/laydown/sitemap.xml

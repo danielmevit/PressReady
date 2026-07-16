@@ -14,8 +14,8 @@ from dataclasses import fields, is_dataclass
 from enum import Enum
 from typing import Any
 
-from pressready.engine import data_model
-from pressready.ui.schema import defaults
+from laydown.engine import data_model
+from laydown.ui.schema import defaults
 
 FORMAT_VERSION = 1
 
@@ -63,7 +63,7 @@ def _decode(value: Any) -> Any:
 def save_preset(path: str, values: dict) -> None:
     payload = {
         "format": FORMAT_VERSION,
-        "application": "PressReady",
+        "application": "Laydown",
         "values": {k: _encode(v) for k, v in values.items()},
     }
     with open(path, "w", encoding="utf-8") as handle:
@@ -75,10 +75,10 @@ def load_preset(path: str) -> dict:
         payload = json.load(handle)
 
     if not isinstance(payload, dict) or "values" not in payload:
-        raise ValueError("That file is not a PressReady preset")
+        raise ValueError("That file is not a Laydown preset")
     if payload.get("format", 0) > FORMAT_VERSION:
         raise ValueError(
-            f"This preset was written by a newer PressReady (format "
+            f"This preset was written by a newer Laydown (format "
             f"{payload['format']}, this build reads {FORMAT_VERSION})"
         )
 

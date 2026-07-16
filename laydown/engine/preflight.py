@@ -5,7 +5,7 @@ Preflight — say what's wrong before the press does.
 arrived as an exception after the operator hit Generate, and subtler issues (a source
 with no trim box, bleed with nowhere to go, a page count that doesn't fold) arrived
 at the guillotine. Imposition Wizard has had a preflight dashboard for years; this is
-the same idea sized to PressReady.
+the same idea sized to Laydown.
 
 Checks are pure functions of a Project plus the source document, so they run on every
 settings change without touching the UI.
@@ -17,9 +17,9 @@ from typing import List, Optional
 
 import fitz
 
-from pressready.engine.data_model import LayoutType, Project, SourceBox
-from pressready.engine.geometry import cell_grid, grid_for, source_boxes
-from pressready.engine.utils import mm_to_pt, pt_to_mm
+from laydown.engine.data_model import LayoutType, Project, SourceBox
+from laydown.engine.geometry import cell_grid, grid_for, source_boxes
+from laydown.engine.utils import mm_to_pt, pt_to_mm
 
 
 class Severity(Enum):

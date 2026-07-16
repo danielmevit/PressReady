@@ -1,23 +1,23 @@
 ---
 import fs from "node:fs";
 
-// The version has one home: pressready/__init__.py. Read it at build time rather
+// The version has one home: laydown/__init__.py. Read it at build time rather
 // than restate it here, or the site will eventually advertise a version that isn't
 // the one on the releases page.
 const initPy = fs.readFileSync(
-  new URL("../../../pressready/__init__.py", import.meta.url),
+  new URL("../../../laydown/__init__.py", import.meta.url),
   "utf8",
 );
 const match = initPy.match(/__version__\s*=\s*"([^"]+)"/);
-if (!match) throw new Error("Could not read __version__ from pressready/__init__.py");
+if (!match) throw new Error("Could not read __version__ from laydown/__init__.py");
 const version = match[1];
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const title = "PressReady — free PDF imposition for print";
+const title = "Laydown — free PDF imposition for print";
 const description =
   "Free, open-source PDF imposition. Lay your pages out on the press sheet — n-up, booklets, marks and bleed — on Windows, macOS and Linux. Runs on your machine, nothing uploaded.";
 const author = "Daniel Mevit";
-const repo = "https://github.com/danielmevit/pressready";
+const repo = "https://github.com/danielmevit/laydown";
 const releases = `${repo}/releases`;
 const latest = `${repo}/releases/latest`;
 const year = 2026;
@@ -29,7 +29,7 @@ const features = [
   },
   {
     title: "It reads print files properly",
-    body: "If your PDF has a trim box and bleed, PressReady uses them: it places the finished page and carries your bleed past the cut line. Ordinary PDFs with no boxes work fine too.",
+    body: "If your PDF has a trim box and bleed, Laydown uses them: it places the finished page and carries your bleed past the cut line. Ordinary PDFs with no boxes work fine too.",
   },
   {
     title: "The preview is the sheet",
@@ -37,7 +37,7 @@ const features = [
   },
   {
     title: "It speaks up early",
-    body: "Margins that don't fit, a missing trim box, pages quietly being shrunk — PressReady says so while you can still fix it, instead of letting you find out at the guillotine.",
+    body: "Margins that don't fit, a missing trim box, pages quietly being shrunk — Laydown says so while you can still fix it, instead of letting you find out at the guillotine.",
   },
   {
     title: "Booklets that fold right",
@@ -100,24 +100,24 @@ const faqs = [
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://danielmevit.github.io/pressready/" />
+    <meta property="og:url" content="https://danielmevit.github.io/laydown/" />
     <meta
       property="og:image"
-      content="https://raw.githubusercontent.com/DanielMevit/PressReady/main/assets/screenshot.png"
+      content="https://raw.githubusercontent.com/DanielMevit/Laydown/main/assets/screenshot.png"
     />
-    <meta property="og:site_name" content="PressReady" />
+    <meta property="og:site_name" content="Laydown" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <script type="application/ld+json" is:inline set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      name: "PressReady",
+      name: "Laydown",
       applicationCategory: "DesignApplication",
       operatingSystem: "Windows 10, Windows 11, macOS 11+, Linux",
       description:
         "Free, open-source PDF imposition for commercial printing. N-up, booklets, signatures, creep, printer marks, bleed and trim-box aware. Runs locally.",
-      url: "https://danielmevit.github.io/pressready/",
-      downloadUrl: "https://github.com/danielmevit/pressready/releases",
+      url: "https://danielmevit.github.io/laydown/",
+      downloadUrl: "https://github.com/danielmevit/laydown/releases",
       softwareVersion: version,
       author: { "@type": "Person", name: author, url: "https://github.com/danielmevit" },
       license: "https://www.gnu.org/licenses/agpl-3.0.html",
@@ -127,7 +127,7 @@ const faqs = [
 
     <style is:global>
       :root {
-        /* PressReady's own palette: warm ink on press-black, not a tech blue. */
+        /* Laydown's own palette: warm ink on press-black, not a tech blue. */
         --bg: #0a0a0a;
         --bg-soft: #101010;
         --card: #151515;
@@ -299,7 +299,7 @@ const faqs = [
     <div class="wrap">
       <nav>
         <a class="brand" href={`${base}/`}>
-          <span class="glyph"></span> PressReady
+          <span class="glyph"></span> Laydown
         </a>
         <div class="links">
           <a href="#features">Features</a>
@@ -314,7 +314,7 @@ const faqs = [
     <header class="wrap hero">
       <h1>Put your pages on the <span class="hl">press sheet</span></h1>
       <p class="lead">
-        PressReady lays PDF pages out for printing — two-up on A3, a saddle-stitched
+        Laydown lays PDF pages out for printing — two-up on A3, a saddle-stitched
         booklet, a sheet of labels — so they come out right after they're printed,
         folded and cut. Free, open source, and it runs on your machine.
       </p>
@@ -330,7 +330,7 @@ const faqs = [
         <img
           src={`${base}/assets/screenshot.png`}
           width="1600" height="980"
-          alt="PressReady laying a 16-page booklet out on A3 sheets, with the settings panel showing booklet binding, creep and gutter controls"
+          alt="Laydown laying a 16-page booklet out on A3 sheets, with the settings panel showing booklet binding, creep and gutter controls"
         />
       </div>
     </header>
@@ -367,7 +367,7 @@ const faqs = [
 
     <section id="download" class="wrap">
       <div class="section-head">
-        <h2>Download PressReady {version}</h2>
+        <h2>Download Laydown {version}</h2>
         <p>Free, no account, no strings. Everything's included — no Python needed.</p>
       </div>
       <div class="dl-grid">

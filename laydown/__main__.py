@@ -1,25 +1,25 @@
-"""PressReady entry point.  Run with: python -m pressready"""
+"""Laydown entry point.  Run with: python -m laydown"""
 
 import argparse
 import os
 import sys
 
-from pressready import __version__
+from laydown import __version__
 
 os.environ.setdefault("QT_LOGGING_RULES", "qt.qpa.fonts.warning=false")
 
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="pressready",
-        description="PressReady — PDF imposition for commercial printing.",
+        prog="laydown",
+        description="Laydown — PDF imposition for commercial printing.",
     )
     p.add_argument("pdf", nargs="?", help="PDF to open on startup")
     p.add_argument(
         "--smoke", action="store_true",
         help="run a headless end-to-end self-check and exit (0 = healthy, 1 = broken)",
     )
-    p.add_argument("--version", action="version", version=f"PressReady {__version__}")
+    p.add_argument("--version", action="version", version=f"Laydown {__version__}")
     return p
 
 
@@ -29,18 +29,18 @@ def run_gui(pdf: str = "") -> int:
     from PyQt6.QtWidgets import QApplication
     from PyQt6.QtGui import QFont
 
-    from pressready.ui import theme
-    from pressready.ui.main_window import MainWindow, app_icon
+    from laydown.ui import theme
+    from laydown.ui.main_window import MainWindow, app_icon
 
     if sys.platform == "win32":
         # Matches the MSIX Identity Name, so the taskbar groups the packaged app and
         # the portable build under one icon instead of two.
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-            "PressReadyTeam.PressReady")
+            "LaydownTeam.Laydown")
 
     app = QApplication(sys.argv)
     theme.apply(app)
-    app.setApplicationName("PressReady")
+    app.setApplicationName("Laydown")
     app.setApplicationVersion(__version__)
     app.setWindowIcon(app_icon())
     app.setFont(QFont("Segoe UI", 9))
@@ -69,12 +69,12 @@ def run_smoke() -> int:
     try:
         import fitz
 
-        from pressready.engine.data_model import (
+        from laydown.engine.data_model import (
             Project, LayoutSettings, LayoutType, SheetSettings, Orientation,
             MarkItem, MarkType,
         )
-        from pressready.engine.impose import impose
-        from pressready.engine.utils import mm_to_pt
+        from laydown.engine.impose import impose
+        from laydown.engine.utils import mm_to_pt
 
         with tempfile.TemporaryDirectory() as tmp:
             # 1. a sample source, built rather than bundled so nothing can go stale
@@ -82,7 +82,7 @@ def run_smoke() -> int:
             doc = fitz.open()
             for i in range(1, 5):
                 page = doc.new_page(width=mm_to_pt(210), height=mm_to_pt(297))
-                page.insert_text((72, 96), f"PressReady smoke page {i}", fontsize=18)
+                page.insert_text((72, 96), f"Laydown smoke page {i}", fontsize=18)
                 page.draw_rect(page.rect + (20, 20, -20, -20), color=(0.3, 0.3, 0.3), width=0.8)
             doc.save(src)
             doc.close()
@@ -108,7 +108,7 @@ def run_smoke() -> int:
             if abs(width - mm_to_pt(420)) > 1.0:
                 raise AssertionError(f"expected an A3-landscape sheet, got width {width:.1f}pt")
             words = {w[4] for w in result[0].get_text("words")}
-            if "PressReady" not in words:
+            if "Laydown" not in words:
                 raise AssertionError("imposed sheet carries none of the source text")
             result.close()
             done.append("verified sheet count, sheet size and placed content")
@@ -116,7 +116,7 @@ def run_smoke() -> int:
             # 4. the real window, offscreen
             from PyQt6.QtWidgets import QApplication
 
-            from pressready.ui.main_window import MainWindow
+            from laydown.ui.main_window import MainWindow
 
             app = QApplication.instance() or QApplication([])
             win = MainWindow()
@@ -137,7 +137,7 @@ def run_smoke() -> int:
 
     for step in done:
         print(f"  ok   {step}")
-    print(f"SMOKE OK — PressReady {__version__}")
+    print(f"SMOKE OK — Laydown {__version__}")
     return 0
 
 

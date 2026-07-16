@@ -1,7 +1,7 @@
 """
 What the engine actually honours.
 
-PressReady 0.2.0 shipped a Layout tab that collected booklet modes, right-to-left,
+Laydown 0.2.0 shipped a Layout tab that collected booklet modes, right-to-left,
 signatures and page creep, and an engine that silently ignored all of them. The
 settings existed, the UI wrote them, nothing read them, and the operator only found
 out at the press. That failure was possible because "the model has a field" and
@@ -22,7 +22,7 @@ Put it in NOT_IMPLEMENTED and the UI is forbidden from offering it.
 from dataclasses import fields, is_dataclass
 from typing import Any, Set
 
-from pressready.engine.data_model import Project
+from laydown.engine.data_model import Project
 
 
 # Settings the engine reads and acts on. The UI may offer these.
