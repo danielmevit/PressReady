@@ -17,6 +17,11 @@ starts (`_refs/ai-full-build-recipe.md` §4). Sizes: **S** ≈ a session, **M** 
   auto-rotate, signatures, perfect binding, creep and RTL; units, four new mark types and
   preflight. Engine order was 1 → 2 → 5 → 6 → 3 → 4: with everything shipping together the
   old UI never reached anyone, so the schema was written once against a finished engine.
+- **0.3.0 released** (2026-07-15) — Windows x64 (MSIX + portable), macOS arm64 + Intel (.dmg),
+  Linux x86_64 (tar.gz), all built by CI on the tag with tests and `--smoke` gating each
+  platform and a single publish job so a release is complete or absent. Website live at
+  <https://danielmevit.github.io/pressready/>. The February v2.0.0 release was renumbered
+  v0.2.0. No 32-bit Windows build — PyQt6 ships no win32 wheel (see GOTCHAS).
 
 ## Not done from the original plan (deliberately)
 - **Work-and-turn / work-and-tumble.** Not orderings but press-form techniques: both forms

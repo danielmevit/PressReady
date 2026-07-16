@@ -6,9 +6,11 @@ for commercial printing). Python 3.10+, PyQt6 UI, PyMuPDF (fitz) engine. Runs on
 macOS and Linux. Current version **0.3.0**. License: AGPL-3.0-only.
 
 ## Current priority
-**v0.3.0 is built and pushed on `dev`; see `ROADMAP.md` backlog for what's next.** All six
-planned phases have landed (CHANGELOG.md has the detail). The plan was grounded in a study of
-Imposition Wizard 3 and Toolcraft — `docs/ai/REFERENCE_STUDY.md`.
+**0.3.0 is released** — <https://github.com/danielmevit/pressready/releases/tag/v0.3.0>,
+five files across Windows x64, macOS (arm64 + Intel) and Linux; the published Linux artifact
+was downloaded back and passes `--smoke`. Next work: `ROADMAP.md` backlog. All six planned
+phases landed (CHANGELOG.md has the detail); the plan was grounded in a study of Imposition
+Wizard 3 and Toolcraft — `docs/ai/REFERENCE_STUDY.md`.
 
 Two things to know before changing anything:
 - **The UI cannot offer a setting the engine ignores.** `engine/capabilities.py` classifies
@@ -17,8 +19,8 @@ Two things to know before changing anything:
 - **Settings UI is declared, not written.** Add a schema entry in `ui/schema.py`; don't
   hand-build controls.
 
-Releasing: tag `vX.Y.Z` and `.github/workflows/release.yml` builds all five artifacts. The
-website deploys from `main`.
+Releasing: tag `vX.Y.Z` and `.github/workflows/release.yml` builds everything and publishes
+once all platforms pass (no partial releases). The website deploys from `main`.
 
 ## How to run
 - **App:** `pip install -e .` then `python -m pressready`

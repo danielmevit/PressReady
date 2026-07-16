@@ -175,7 +175,7 @@ jobs:
             PDF imposition for print — lay your pages out on the press sheet.
 
             **Windows** — `.msix` installs; the `-portable.zip` just unzips and runs.
-            A 32-bit portable build is here for older machines.
+            64-bit only (PyQt6 ships no 32-bit Windows packages).
             **macOS** — `.dmg`, drag to Applications. First launch: right-click → Open.
             **Linux** — extract the `.tar.gz` and run `./PressReady`. No Python needed.
 
