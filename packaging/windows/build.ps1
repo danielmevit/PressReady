@@ -21,7 +21,14 @@
 #>
 param(
     [switch]$SkipPyInstaller,
-    [switch]$SkipMsix
+    [switch]$SkipMsix,
+    # -Store builds the Microsoft Store package: UNSIGNED (the Store signs it) and
+    # stamped with the identity Partner Center assigns, taken from the environment:
+    #   LAYDOWN_STORE_IDENTITY_NAME       e.g. 12345DanielMevit.Laydown
+    #   LAYDOWN_STORE_PUBLISHER           e.g. CN=A1B2C3D4-....  (a GUID subject)
+    #   LAYDOWN_STORE_PUBLISHER_DISPLAY   the Partner Center publisher display name
+    # Find all three in Partner Center: your app -> Product management -> Product identity.
+    [switch]$Store
 )
 
 $ErrorActionPreference = "Stop"
@@ -109,16 +116,29 @@ $manifest = [regex]::Replace($manifest, '(<Identity[^>]*?\sVersion=")[^"]+(")', 
 if ($manifest -notmatch [regex]::Escape($appVersion)) {
     Write-Error "Could not stamp version $appVersion into AppxManifest.xml"
 }
+if ($Store) {
+    foreach ($required in @("LAYDOWN_STORE_IDENTITY_NAME", "LAYDOWN_STORE_PUBLISHER", "LAYDOWN_STORE_PUBLISHER_DISPLAY")) {
+        if (-not (Get-Item "env:$required" -ErrorAction SilentlyContinue).Value) {
+            Write-Error "-Store needs $required (see Partner Center -> Product identity)"
+        }
+    }
+    $manifest = [regex]::Replace($manifest, '(<Identity[^>]*?\sName=")[^"]+(")', "`${1}$($env:LAYDOWN_STORE_IDENTITY_NAME)`${2}")
+    $manifest = [regex]::Replace($manifest, '(<Identity[^>]*?\sPublisher=")[^"]+(")', "`${1}$($env:LAYDOWN_STORE_PUBLISHER)`${2}")
+    $manifest = [regex]::Replace($manifest, '(<PublisherDisplayName>)[^<]+(</PublisherDisplayName>)', "`${1}$($env:LAYDOWN_STORE_PUBLISHER_DISPLAY)`${2}")
+    Write-Host "[ok] Store identity stamped: $($env:LAYDOWN_STORE_IDENTITY_NAME)" -ForegroundColor Green
+}
 Set-Content "$stageDir\AppxManifest.xml" $manifest -Encoding UTF8
 
 New-Item -ItemType Directory -Path "$stageDir\assets\icons\msix" -Force | Out-Null
 Copy-Item "$root\assets\icons\msix\*" "$stageDir\assets\icons\msix\"
 
+# (Store builds skip the certificate machinery entirely - the Store signs.)
 # The signing certificate. Users must trust the SAME certificate across releases, so
 # CI restores a stable PFX from a repo secret (LAYDOWN_CERT_PFX_B64) before this
 # script runs; the password rides in LAYDOWN_CERT_PASSWORD. A per-run throwaway
 # cert is what shipped v0.3.0's first MSIX -- the .cer users needed to trust existed
 # only on a dead runner VM, so Windows refused the install with 0x800B010A.
+if (-not $Store) {
 $certDir = "$root\certs"
 $pfxPath = "$certDir\Laydown.pfx"
 $cerPath = "$certDir\Laydown.cer"
@@ -140,11 +160,19 @@ if (-not (Test-Path $cerPath)) {
     $pfxData = Get-PfxData -FilePath $pfxPath -Password $pw
     Export-Certificate -Cert $pfxData.EndEntityCertificates[0] -FilePath $cerPath | Out-Null
 }
+}
 
-$msixPath = "$outDir\Laydown-$version-windows-x64.msix"
+$suffix = if ($Store) { "store" } else { "windows-x64" }
+$msixPath = "$outDir\Laydown-$version-$suffix.msix"
 if (Test-Path $msixPath) { Remove-Item $msixPath -Force }
 & $makeappx pack /d $stageDir /p $msixPath /o
 if ($LASTEXITCODE -ne 0) { Write-Error "makeappx failed" }
+if ($Store) {
+    # Deliberately unsigned: the Store rejects pre-signed uploads and signs it itself.
+    Write-Host "[ok] $msixPath (unsigned, for Partner Center upload)" -ForegroundColor Green
+    Pop-Location
+    exit 0
+}
 & $signtool sign /fd SHA256 /a /f $pfxPath /p $pfxPassword $msixPath
 if ($LASTEXITCODE -ne 0) { Write-Error "signtool failed" }
 

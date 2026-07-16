@@ -1,7 +1,5 @@
 {
   "exclude": [
-    "**/_legacy/**",
-    "**/framer-demo/**",
-    "**/pressready-voice/**"
+    "**/framer-demo/**"
   ]
 }

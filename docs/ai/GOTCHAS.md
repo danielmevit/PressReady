@@ -102,6 +102,7 @@
 - Watch for local names shadowing `theme as t` (`for t in ...` cost an hour).
 
 ## Repo oddities
-- `pressready-voice/` (tray dictation app) and `framer-demo/` (web demo) are **separate
-  side-projects** living in this folder; both are excluded from CodeGraph via
-  `codegraph.json`. `_legacy/` on disk is untracked leftover (already deleted from git).
+- `framer-demo/` (a web demo) is a **separate side-project** still tracked in this repo,
+  excluded from CodeGraph via `codegraph.json`; its future home is undecided. The other two
+  squatters are gone (2026-07-16): `pressready-voice/` moved to `D:\Vibe Coding\pressready-voice`,
+  and the untracked `_legacy/` copy was deleted — v1 lives in git history (commit cf2b650).
