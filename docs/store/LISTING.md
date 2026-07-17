@@ -2,53 +2,58 @@
 
 Field-by-field copy for Partner Center. Tone matches the site: commercial, not arrogant.
 
-## App name (reserved in Partner Center)
+## Product name
 Laydown
 
-## Short description / subtitle (100 chars max)
-PDF imposition for print — booklets, n-up, marks and bleed. Runs locally, nothing uploaded.
+## Description* (required — this is the field with the red error)
+Laydown arranges your PDF pages onto printing sheets — so a booklet or a multi-page
+layout comes out in the right order once it's printed, folded and cut.
 
-## Description
-Laydown lays PDF pages out on printing sheets, so they come out right after they're
-printed, folded and cut. Two-up on A3, a saddle-stitched booklet, a sheet of labels —
-that job.
+Open a PDF, choose how the pages should sit on the sheet, and Laydown shows you the
+finished sheet on screen. When it looks right, save the new PDF and send it to your
+printer.
 
-WHAT IT DOES
+What you can do:
 
-• N-up — 1, 2, 4, 6, 8, 9 or 16 pages per sheet, or set rows × columns yourself
-• Booklets — saddle stitch or perfect binding with signatures; the page order is
-  worked out for you
-• Creep compensation — evens up the margins on thicker folded booklets
-• Reads print files properly — if your PDF has a trim box and bleed, Laydown uses
-  them; ordinary PDFs work fine too
-• Printer's marks — crop, gap crop, registration, fold, perforation, collating
-  marks, a colour bar, text labels, and custom marks from any PDF you supply
-• Preflight — margins that don't fit, a missing trim box, pages quietly being
-  shrunk: you hear about it before you print, not at the guillotine
-• The preview is the real sheet — rendered from an actual imposition, with the cut
-  lines it will actually use
-• Pages stay sharp — they're embedded as vectors, never re-rendered into pictures
-• Millimetres, centimetres, inches or points; undo/redo; presets for repeat jobs
+• Put several pages on one sheet — 2, 4, 8 and more
+• Make booklets — the pages are reordered for folding automatically
+• Add crop marks, fold marks and registration marks
+• Use the trim and bleed from print-ready PDFs
+• Work in mm, cm, inches or points; save presets; undo anything
 
-PRIVATE BY DESIGN
+Everything runs on your own computer. Nothing is uploaded, no account is needed, and
+it's free and open source.
 
-Laydown has no network code at all. It opens your file, writes a new one, and
-that's the whole story. No account, no upload, no telemetry.
+## Short description (optional, ~270 chars — shows near the top of the listing)
+Arrange PDF pages onto printing sheets — booklets, multi-up layouts and printer's
+marks. See the finished sheet before you print. Runs on your computer; free and open
+source.
 
-FREE AND OPEN SOURCE
+## Product features (optional — up to 20 short bullets, one per row)
+- Put several pages on one sheet
+- Make print-ready booklets
+- Crop, fold and registration marks
+- Handles bleed and trim boxes
+- Preview the finished sheet before printing
+- 100% offline — nothing is uploaded
 
-Laydown is AGPL-3.0 open source with no paid tier. The code is public at
-github.com/danielmevit/laydown.
+## What's new in this version
+Leave blank — Partner Center's own hint says to skip it on a first submission.
 
-Always check your output before committing a job to press.
+## Keywords (up to 7 — press Enter after each)
+imposition
+booklet
+prepress
+n-up
+print layout
+saddle stitch
+crop marks
 
-## What's new (first submission)
-First Store release. Same app as Laydown 0.4.0 on GitHub: n-up and booklet
-imposition, trim/bleed-aware placement, printer's marks, preflight checks,
-presets and undo.
+## Copyright and trademark info (optional)
+© 2026 Daniel Mevit
 
-## Search terms (max 7)
-imposition · booklet · prepress · n-up · print layout · saddle stitch · crop marks
+## Developed by (optional)
+Daniel Mevit — damt.xyz
 
 ## Category
 Productivity (or: Photo & video → Utility; Productivity fits better)
