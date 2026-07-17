@@ -104,8 +104,26 @@ There is nothing to configure. It's a self-contained MSIX:
   a per-user config folder; nothing system-wide, nothing that needs pre-provisioning.
 
 ## 8. Packages tab
-Upload the single file I'll build for you: `Laydown-0.4.0-store.msix` (unsigned — the Store signs
-it). One package covers x64 Windows 10 1809+ and Windows 11.
+Upload `Laydown-<version>-store.msix` (unsigned — the Store signs it). One package covers x64
+Windows 10 1809+ and Windows 11. On upload you'll see a **warning** (not an error):
+"restricted capabilities require approval… runFullTrust". That's normal for every packaged
+desktop app and does not block submission — it just needs the justification below.
+
+## 8a. Submission Options — restricted capability justification (REQUIRED)
+`runFullTrust` is a restricted capability, so the Store requires a written justification on the
+**Submission Options** page. Paste this:
+
+> Laydown is a full-trust Win32 desktop application (built with Python, PyQt6 and PyMuPDF,
+> packaged as MSIX). It declares `runFullTrust` because that capability is required for any
+> packaged desktop application to launch its native executable — it is not a UWP app. The
+> capability is used solely to run the application's own bundled code: opening a PDF the user
+> selects from local disk, arranging its pages for printing, and writing a new PDF to a location
+> the user chooses. Laydown makes no network connections, installs no services or drivers, and
+> accesses no data beyond the files the user explicitly opens and saves.
+
+A human tester reviews this, which can add a little time to certification, but it is routinely
+approved for genuine desktop tools. (You do **not** need this for sideloading — only for the
+Store.)
 
 ## 9. Store listing (text + images)
 All the wording — description, short description, the 7 search terms, "what's new" — is in
