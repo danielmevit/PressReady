@@ -6,17 +6,15 @@ The settings column is not built here. It is rendered from ``ui/schema.SCHEMA`` 
 the engine doesn't honour fails the test suite rather than the operator's job.
 """
 
-import math
 import os
 import pathlib
 import sys
 import webbrowser
 from typing import Optional
 
-from PyQt6.QtCore import QSize, QSettings, Qt, QRectF, QPointF, QThread, pyqtSignal
+from PyQt6.QtCore import QSize, QSettings, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import (
-    QAction, QActionGroup, QColor, QDragEnterEvent, QDropEvent, QFont, QIcon, QKeySequence,
-    QPainter, QPen, QPixmap, QPolygonF,
+    QAction, QActionGroup, QDragEnterEvent, QDropEvent, QIcon, QKeySequence, QPixmap,
 )
 from PyQt6.QtWidgets import (
     QApplication, QButtonGroup, QDialog, QDialogButtonBox, QFileDialog, QFrame,
@@ -31,6 +29,7 @@ from laydown.engine.impose import impose
 from laydown.engine.utils import Unit
 from laydown.ui import theme as t
 from laydown.ui.help import tutorials_html
+from laydown.ui.icons import lucide
 from laydown.ui.marks_tab import MarksTab
 from laydown.ui.panel import SchemaTab, ValueStore
 from laydown.ui.preprocessors_tab import PreprocessorsTab
@@ -42,9 +41,6 @@ _MAX_RECENT = 8
 _ICON_SZ = 22
 _TAB_SZ = 24
 
-_STROKE = QColor(t.FG_MUTED)
-_FILL = QColor(t.INPUT_BG)
-
 _TOOL_BTN_STYLE = (
     f"QToolButton {{ padding: 4px; border-radius: {t.RADIUS_SM}px; border: none;"
     f"               background: transparent; }}"
@@ -53,119 +49,10 @@ _TOOL_BTN_STYLE = (
 )
 
 
-# ── icons, drawn rather than shipped ─────────────────
+# ── icons — the Lucide set (see laydown/ui/icons.py) ─
 
-def _icon(draw, size=_ICON_SZ) -> QIcon:
-    pm = QPixmap(size, size)
-    pm.fill(Qt.GlobalColor.transparent)
-    p = QPainter(pm)
-    p.setRenderHint(QPainter.RenderHint.Antialiasing)
-    draw(p)
-    p.end()
-    return QIcon(pm)
-
-
-def _ico_1col():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.3)); p.setBrush(_FILL)
-        p.drawRect(QRectF(6, 2, 10, 18))
-    return _icon(draw)
-
-
-def _ico_2col():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.2)); p.setBrush(_FILL)
-        p.drawRect(QRectF(1, 3, 8.5, 16)); p.drawRect(QRectF(12.5, 3, 8.5, 16))
-    return _icon(draw)
-
-
-def _ico_4col():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.0)); p.setBrush(_FILL)
-        for i in range(4):
-            p.drawRect(QRectF(1 + i * 5.3, 4, 4, 14))
-    return _icon(draw)
-
-
-def _ico_zoom(plus: bool):
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.5)); p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawEllipse(QPointF(9, 9), 5.5, 5.5)
-        p.drawLine(QPointF(13, 13), QPointF(18, 18))
-        p.drawLine(QPointF(7, 9), QPointF(11, 9))
-        if plus:
-            p.drawLine(QPointF(9, 7), QPointF(9, 11))
-    return _icon(draw)
-
-
-def _ico_fit_width():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.3))
-        p.drawLine(QPointF(2, 11), QPointF(20, 11))
-        for x, d in ((2, 4), (20, -4)):
-            p.drawLine(QPointF(x, 11), QPointF(x + d, 8))
-            p.drawLine(QPointF(x, 11), QPointF(x + d, 14))
-    return _icon(draw)
-
-
-def _ico_fit_page():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.2)); p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawRect(QRectF(4, 3, 14, 16))
-        p.drawLine(QPointF(8, 11), QPointF(14, 11))
-        p.drawLine(QPointF(11, 8), QPointF(11, 14))
-    return _icon(draw)
-
-
-def _ico_actual():
-    def draw(p):
-        f = QFont(t.FONT_FAMILY, 8); f.setBold(True)
-        p.setFont(f); p.setPen(_STROKE)
-        p.drawText(QRectF(0, 0, _ICON_SZ, _ICON_SZ), Qt.AlignmentFlag.AlignCenter, "1:1")
-    return _icon(draw)
-
-
-def _ico_tab_source():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.2)); p.setBrush(QColor(t.RAISED))
-        p.drawRect(QRectF(8, 1, 12, 15))
-        p.setBrush(_FILL); p.drawRect(QRectF(3, 5, 12, 15))
-    return _icon(draw, _TAB_SZ)
-
-
-def _ico_tab_layout():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.2)); p.setBrush(_FILL)
-        g = 2.0; w = (_TAB_SZ - g * 3) / 2
-        for r in range(2):
-            for c in range(2):
-                p.drawRect(QRectF(g + c * (w + g), g + r * (w + g), w, w))
-    return _icon(draw, _TAB_SZ)
-
-
-def _ico_tab_sheet():
-    def draw(p):
-        p.setPen(QPen(_STROKE, 1.2)); p.setBrush(_FILL)
-        p.drawRect(QRectF(4, 1, 16, 22))
-        p.setPen(QPen(QColor(t.FG_FAINT), 0.8))
-        for y in (7, 11, 15):
-            p.drawLine(QPointF(7, y), QPointF(17, y))
-    return _icon(draw, _TAB_SZ)
-
-
-def _ico_tab_marks():
-    def draw(p):
-        c = _TAB_SZ / 2.0
-        p.setPen(QPen(_STROKE, 1.0)); p.setBrush(QColor(t.INPUT_BG))
-        pts = [QPointF(c + (9.5 if i % 2 == 0 else 6.0) * math.cos(i * math.pi / 6),
-                       c + (9.5 if i % 2 == 0 else 6.0) * math.sin(i * math.pi / 6))
-               for i in range(12)]
-        p.drawPolygon(QPolygonF(pts))
-        p.setBrush(QColor(t.BG)); p.drawEllipse(QPointF(c, c), 3, 3)
-    return _icon(draw, _TAB_SZ)
-
-
-_TAB_ICONS = (_ico_tab_source, _ico_tab_layout, _ico_tab_sheet, _ico_tab_marks)
+# Order matches the four settings tabs: Source, Layout, Sheet, Marks.
+_TAB_ICON_NAMES = ("tab_source", "tab_layout", "tab_sheet", "tab_marks")
 
 
 def _tool_btn(icon, tooltip, checkable=False, checked=False):
@@ -413,29 +300,29 @@ class MainWindow(QMainWindow):
 
         columns = QButtonGroup(self)
         columns.setExclusive(True)
-        for count, icon, tip in ((1, _ico_1col(), "Single column"),
-                                 (2, _ico_2col(), "Two columns"),
-                                 (4, _ico_4col(), "Four columns")):
-            button = _tool_btn(icon, tip, checkable=True, checked=(count == 2))
+        for count, glyph, tip in ((1, "columns_1", "Single column"),
+                                  (2, "columns_2", "Two columns"),
+                                  (4, "columns_4", "Four columns")):
+            button = _tool_btn(lucide(glyph), tip, checkable=True, checked=(count == 2))
             columns.addButton(button, count)
             row.addWidget(button)
         columns.idClicked.connect(lambda n: self._canvas.set_columns(n))
 
         row.addStretch(1)
-        for icon, tip, slot in (
-            (_ico_zoom(True), "Zoom in", lambda: self._canvas.zoom_in()),
-            (_ico_zoom(False), "Zoom out", lambda: self._canvas.zoom_out()),
+        for glyph, tip, slot in (
+            ("zoom_in", "Zoom in", lambda: self._canvas.zoom_in()),
+            ("zoom_out", "Zoom out", lambda: self._canvas.zoom_out()),
         ):
-            button = _tool_btn(icon, tip)
+            button = _tool_btn(lucide(glyph), tip)
             button.clicked.connect(slot)
             row.addWidget(button)
         row.addWidget(_vsep())
-        for icon, tip, slot in (
-            (_ico_fit_width(), "Fit to width", lambda: self._canvas.fit_width()),
-            (_ico_fit_page(), "Fit whole sheet", lambda: self._canvas.fit_page()),
-            (_ico_actual(), "Actual size (1:1)", lambda: self._canvas.actual_size()),
+        for glyph, tip, slot in (
+            ("fit_width", "Fit to width", lambda: self._canvas.fit_width()),
+            ("fit_page", "Fit whole sheet", lambda: self._canvas.fit_page()),
+            ("actual_size", "Actual size (1:1)", lambda: self._canvas.actual_size()),
         ):
-            button = _tool_btn(icon, tip)
+            button = _tool_btn(lucide(glyph), tip)
             button.clicked.connect(slot)
             row.addWidget(button)
         row.addStretch(1)
@@ -557,7 +444,7 @@ class MainWindow(QMainWindow):
             f"QTabBar::tab:hover:!selected {{ background: {t.HOVER_WASH}; }}"
         )
         for index, tab in enumerate(SCHEMA):
-            self._tab_bar.addTab(_TAB_ICONS[index](), "")
+            self._tab_bar.addTab(lucide(_TAB_ICON_NAMES[index], _TAB_SZ), "")
             self._tab_bar.setTabToolTip(index, tab.name)
         column.addWidget(self._tab_bar)
 
@@ -600,7 +487,8 @@ class MainWindow(QMainWindow):
         row = QVBoxLayout(footer)
         row.setContentsMargins(t.SPACE_3, t.SPACE_3, t.SPACE_3, t.SPACE_3)
 
-        self._generate = QPushButton("Generate PDF")
+        self._generate = QPushButton("  Generate PDF")
+        self._generate.setIcon(lucide("generate", 18, t.ACCENT_FG))
         self._generate.setProperty("accent", True)
         self._generate.setEnabled(False)
         self._generate.setCursor(Qt.CursorShape.PointingHandCursor)

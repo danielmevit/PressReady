@@ -1,8 +1,42 @@
 # Changelog
 
-All notable changes to PressReady are documented here.
+All notable changes to Laydown (formerly PressReady) are documented here.
 
 ---
+
+## [0.4.1] — 2026-07-17
+
+- **UI icons are now the [Lucide](https://lucide.dev) set.** The toolbar (column views, zoom,
+  fit-to-width / fit-page / actual-size), the four settings-tab glyphs (source, layout, sheet →
+  ruler, marks → crop) and the Generate button were hand-drawn with QPainter; they're now the
+  verbatim Lucide SVGs, rendered through QtSvg and tinted to the theme. Consistent stroke weight,
+  crisp at any DPI. Lucide is ISC-licensed; attribution is in `NOTICE`.
+- `laydown/ui/icons.py` holds the icon set with a test that guards every name, so a mistyped glyph
+  fails CI instead of crashing the window. QtSvg is bundled automatically by the existing
+  PyInstaller collection (verified in a frozen Linux build).
+
+## [0.4.0] — 2026-07-16
+
+**PressReady is now Laydown.** Fujifilm ships "Revoria XMF PressReady" — a prepress workflow
+product in this exact field — so the old name was a collision waiting to matter. "Laydown" is
+what printers call the imposition arrangement itself. Same app, same code lineage.
+
+- **Windows sees a different app.** The package identity changed (`PressReadyTeam.PressReady`
+  → `LaydownTeam.Laydown`), so an existing PressReady install does not upgrade — remove it once:
+  `Get-AppxPackage PressReadyTeam.PressReady | Remove-AppxPackage`.
+- New signing certificate (its subject must match the new publisher), executable/artifact names
+  (`Laydown.exe`, `Laydown-<version>-<platform>`), settings under `HKCU\Software\Laydown`, repo
+  at `github.com/danielmevit/laydown`, site at <https://danielmevit.github.io/laydown/>.
+- Releases 0.2.0 and 0.3.0 keep their PressReady-named files — history is not rewritten.
+
+### MSIX signing fixed (0x800B010A)
+
+The 0.3.0 release pipeline signed each MSIX with a certificate minted on the CI runner and
+destroyed with it, so the public certificate users needed to trust never existed anywhere they
+could get it — every install failed with 0x800B010A. Releases are now signed with one stable
+certificate (kept in repo secrets, valid to 2031); its public half ships as
+`Laydown-msix-signing.cer` beside the installer, and the notes carry the one-time trust command.
+The 0.3.0 Windows assets were rebuilt and replaced in place.
 
 ## [0.3.0] — 2026-07-15
 
