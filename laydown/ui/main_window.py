@@ -191,46 +191,56 @@ class MainWindow(QMainWindow):
     def _build_menubar(self):
         bar = self.menuBar()
 
+        def mi(name):  # a menu-sized Lucide icon
+            return lucide(name, 16)
+
         file_menu = bar.addMenu("&File")
-        self._act_open = QAction("&Open PDF…", self, shortcut=QKeySequence("Ctrl+O"),
-                                 triggered=self._on_open)
+        self._act_open = QAction(mi("open"), "&Open PDF…", self,
+                                 shortcut=QKeySequence("Ctrl+O"), triggered=self._on_open)
         file_menu.addAction(self._act_open)
         self._recent_menu = file_menu.addMenu("Open &Recent")
+        self._recent_menu.setIcon(mi("recent"))
         self._rebuild_recent_menu()
 
-        self._act_close = QAction("&Close PDF", self, shortcut=QKeySequence("Ctrl+F4"),
+        self._act_close = QAction(mi("close"), "&Close PDF", self,
+                                  shortcut=QKeySequence("Ctrl+F4"),
                                   enabled=False, triggered=self._on_close_pdf)
         file_menu.addAction(self._act_close)
         file_menu.addSeparator()
 
-        self._act_generate = QAction("&Generate PDF", self, shortcut=QKeySequence("Ctrl+G"),
+        self._act_generate = QAction(mi("generate"), "&Generate PDF", self,
+                                     shortcut=QKeySequence("Ctrl+G"),
                                      enabled=False, triggered=self._on_export)
         file_menu.addAction(self._act_generate)
         file_menu.addSeparator()
-        file_menu.addAction(QAction("Save &Preset…", self, triggered=self._on_save_preset))
-        file_menu.addAction(QAction("&Load Preset…", self, triggered=self._on_load_preset))
+        file_menu.addAction(QAction(mi("save_preset"), "Save &Preset…", self,
+                                    triggered=self._on_save_preset))
+        file_menu.addAction(QAction(mi("load_preset"), "&Load Preset…", self,
+                                    triggered=self._on_load_preset))
         file_menu.addSeparator()
-        file_menu.addAction(QAction("&Quit", self, shortcut=QKeySequence("Alt+F4"),
-                                    triggered=self.close))
+        file_menu.addAction(QAction(mi("quit"), "&Quit", self,
+                                    shortcut=QKeySequence("Alt+F4"), triggered=self.close))
 
         edit_menu = bar.addMenu("&Edit")
-        self._act_undo = QAction("&Undo", self, shortcut="Ctrl+Z", enabled=False,
-                                 triggered=self._undo)
-        self._act_redo = QAction("&Redo", self, shortcut="Ctrl+Y", enabled=False,
-                                 triggered=self._redo)
+        self._act_undo = QAction(mi("undo"), "&Undo", self, shortcut="Ctrl+Z",
+                                 enabled=False, triggered=self._undo)
+        self._act_redo = QAction(mi("redo"), "&Redo", self, shortcut="Ctrl+Y",
+                                 enabled=False, triggered=self._redo)
         edit_menu.addAction(self._act_undo)
         edit_menu.addAction(self._act_redo)
         edit_menu.addSeparator()
-        edit_menu.addAction(QAction("Reset &All Settings", self, triggered=self._on_reset_all))
+        edit_menu.addAction(QAction(mi("reset"), "Reset &All Settings", self,
+                                    triggered=self._on_reset_all))
 
         view_menu = bar.addMenu("&View")
-        view_menu.addAction(QAction("Zoom &In", self, shortcut="Ctrl++",
+        view_menu.addAction(QAction(mi("zoom_in"), "Zoom &In", self, shortcut="Ctrl++",
                                     triggered=lambda: self._canvas.zoom_in()))
-        view_menu.addAction(QAction("Zoom &Out", self, shortcut="Ctrl+-",
+        view_menu.addAction(QAction(mi("zoom_out"), "Zoom &Out", self, shortcut="Ctrl+-",
                                     triggered=lambda: self._canvas.zoom_out()))
-        view_menu.addAction(QAction("&Reset Zoom", self, shortcut="Ctrl+0",
+        view_menu.addAction(QAction(mi("fit_width"), "&Reset Zoom", self, shortcut="Ctrl+0",
                                     triggered=lambda: self._canvas.fit_width()))
         units_menu = view_menu.addMenu("&Units")
+        units_menu.setIcon(mi("tab_sheet"))
         unit_group = QActionGroup(self)
         unit_group.setExclusive(True)
         for unit in Unit:
@@ -254,14 +264,15 @@ class MainWindow(QMainWindow):
             view_menu.addAction(action)
 
         help_menu = bar.addMenu("&Help")
-        help_menu.addAction(QAction("&Tutorials", self, shortcut="F1",
+        help_menu.addAction(QAction(mi("tutorials"), "&Tutorials", self, shortcut="F1",
                                     triggered=self._on_tutorials))
-        help_menu.addAction(QAction("&Preflight…", self, shortcut="F7",
+        help_menu.addAction(QAction(mi("preflight"), "&Preflight…", self, shortcut="F7",
                                     triggered=self._show_preflight_details))
         help_menu.addSeparator()
-        help_menu.addAction(QAction("Open &System Folder", self, triggered=self._on_sysdir))
+        help_menu.addAction(QAction(mi("sysdir"), "Open &System Folder", self,
+                                    triggered=self._on_sysdir))
         help_menu.addSeparator()
-        help_menu.addAction(QAction("&About…", self, triggered=self._on_about))
+        help_menu.addAction(QAction(mi("about"), "&About…", self, triggered=self._on_about))
 
     # ── layout ───────────────────────────────────
 
