@@ -4,6 +4,13 @@ All notable changes to Laydown (formerly PressReady) are documented here.
 
 ---
 
+## [0.4.4] — 2026-07-18
+
+- **The four settings-tab icons are centred within their buttons.** They were built with a
+  `QTabBar`, which left-biases an icon-only tab by ~7px (the empty text still reserves layout),
+  so the glyphs sat off-centre. The strip is now `QToolButton`s in an exclusive group — a
+  QToolButton centres its icon exactly (measured <1px offset, was 7px). Pinned by a test.
+
 ## [0.4.3] — 2026-07-18
 
 - **Security: the dropdown-chevron image is written to the per-user cache, not the shared

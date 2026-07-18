@@ -19,7 +19,7 @@ from PyQt6.QtGui import (
 from PyQt6.QtWidgets import (
     QApplication, QButtonGroup, QDialog, QDialogButtonBox, QFileDialog, QFrame,
     QHBoxLayout, QLabel, QMainWindow, QMessageBox, QProgressDialog, QPushButton,
-    QScrollArea, QStackedWidget, QStatusBar, QTabBar, QTextBrowser, QToolButton,
+    QScrollArea, QStackedWidget, QStatusBar, QTextBrowser, QToolButton,
     QVBoxLayout, QWidget,
 )
 
@@ -440,23 +440,9 @@ class MainWindow(QMainWindow):
         column.setContentsMargins(0, 0, 0, 0)
         column.setSpacing(0)
 
-        self._tab_bar = QTabBar()
-        self._tab_bar.setExpanding(False)   # content-sized, so it can be centred as a group
-        self._tab_bar.setDrawBase(False)
-        self._tab_bar.setIconSize(QSize(_TAB_SZ, _TAB_SZ))
-        self._tab_bar.setStyleSheet(
-            f"QTabBar {{ background: transparent; }}"
-            f"QTabBar::tab {{ padding: 9px 16px; border: none;"
-            f"                border-bottom: 2px solid transparent; }}"
-            f"QTabBar::tab:selected {{ border-bottom: 2px solid {t.ACCENT};"
-            f"                         background: {t.SELECTED_WASH}; }}"
-            f"QTabBar::tab:hover:!selected {{ background: {t.HOVER_WASH}; }}"
-        )
-        for index, tab in enumerate(SCHEMA):
-            self._tab_bar.addTab(lucide(_TAB_ICON_NAMES[index], _TAB_SZ), "")
-            self._tab_bar.setTabToolTip(index, tab.name)
-
-        # Full-width header strip with the four tab icons centred in the middle.
+        # Tab strip built from QToolButtons, not a QTabBar: a QTabBar left-biases an
+        # icon-only tab by ~7px (empty text still reserves layout), so the glyphs sat
+        # off-centre in their buttons. A QToolButton centres its icon exactly.
         tab_header = QFrame()
         tab_header.setObjectName("tabheader")
         tab_header.setStyleSheet(f"#tabheader {{ background: {t.RAISED}; }}")
@@ -464,7 +450,30 @@ class MainWindow(QMainWindow):
         header_row.setContentsMargins(0, 0, 0, 0)
         header_row.setSpacing(0)
         header_row.addStretch(1)
-        header_row.addWidget(self._tab_bar)
+
+        tab_btn_style = (
+            f"QToolButton {{ background: transparent; border: none;"
+            f"               border-bottom: 2px solid transparent; padding: 9px 18px; }}"
+            f"QToolButton:hover:!checked {{ background: {t.HOVER_WASH}; }}"
+            f"QToolButton:checked {{ border-bottom: 2px solid {t.ACCENT};"
+            f"                       background: {t.SELECTED_WASH}; }}"
+        )
+        self._tab_group = QButtonGroup(self)
+        self._tab_group.setExclusive(True)
+        self._tab_buttons = []
+        for index, tab in enumerate(SCHEMA):
+            btn = QToolButton()
+            btn.setIcon(lucide(_TAB_ICON_NAMES[index], _TAB_SZ))
+            btn.setIconSize(QSize(_TAB_SZ, _TAB_SZ))
+            btn.setCheckable(True)
+            btn.setChecked(index == 0)
+            btn.setToolTip(tab.name)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(tab_btn_style)
+            self._tab_group.addButton(btn, index)
+            self._tab_buttons.append(btn)
+            header_row.addWidget(btn)
+
         header_row.addStretch(1)
         column.addWidget(tab_header)
 
@@ -488,7 +497,7 @@ class MainWindow(QMainWindow):
             area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             self._stack.addWidget(area)
         column.addWidget(self._stack, 1)
-        self._tab_bar.currentChanged.connect(self._on_tab_switch)
+        self._tab_group.idClicked.connect(self._on_tab_switch)
 
         column.addWidget(self._create_footer())
         return panel

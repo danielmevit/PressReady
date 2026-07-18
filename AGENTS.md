@@ -20,6 +20,9 @@
 | GOTCHAS.md | Build/run/deploy traps, known bugs |
 | REFERENCE_STUDY.md | What Imposition Wizard 3 and Toolcraft taught us (grounds the roadmap) |
 
+Operational state (releases, Microsoft Store status, signing, how to ship) lives in
+`HANDOFF.md` at the repo root.
+
 Plan and priorities live in `ROADMAP.md` (done / phases / backlog / not-doing) — the single
 work list. Don't start a second one.
 

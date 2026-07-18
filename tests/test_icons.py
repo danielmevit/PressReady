@@ -57,7 +57,25 @@ class TestWiredIntoTheWindow:
     def test_the_window_builds_with_every_icon_present(self, app):
         from laydown.ui.main_window import MainWindow
         w = MainWindow()
-        assert w._tab_bar.count() == 4
-        assert all(not w._tab_bar.tabIcon(i).isNull() for i in range(4))
+        assert len(w._tab_buttons) == 4
+        assert all(not b.icon().isNull() for b in w._tab_buttons)
         assert not w._generate.icon().isNull()
+        w.close()
+
+    def test_tab_icons_are_centred_in_their_buttons(self, app):
+        # A QTabBar left-biases an icon-only tab by ~7px (0.4.3 and earlier); the
+        # QToolButton strip centres each glyph. Guards the regression.
+        from laydown.ui.main_window import MainWindow
+        w = MainWindow()
+        w.resize(1600, 980)
+        w.show()
+        app.processEvents()
+        for i, btn in enumerate(w._tab_buttons):
+            img = btn.grab().toImage()
+            width, height = img.width(), img.height()
+            xs = [x for x in range(width) for y in range(0, height, 2)
+                  if img.pixelColor(x, y).alpha() > 60]
+            assert xs, f"tab {i} drew no icon"
+            offset = sum(xs) / len(xs) - width / 2
+            assert abs(offset) < 4, f"tab {i} icon off-centre by {offset:.1f}px"
         w.close()
