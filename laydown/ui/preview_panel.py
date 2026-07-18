@@ -211,11 +211,16 @@ class SheetCanvas(QScrollArea):
         self._grid.addWidget(lbl, 0, 0)
 
     def _clear_grid(self):
+        # NEVER setParent(None) here: on a visible child that reparents it to the
+        # desktop, i.e. it becomes a *top-level window*. Every zoom rebuilds this grid,
+        # so setParent(None) made each zoom click spawn flashing windows of the sheets.
+        # hide() + deleteLater() removes them from view and frees them while they stay
+        # parented to the content widget until the event loop deletes them.
         while self._grid.count():
             item = self._grid.takeAt(0)
             w = item.widget()
             if w:
-                w.setParent(None)
+                w.hide()
                 w.deleteLater()
         self._sheet_widgets.clear()
 
