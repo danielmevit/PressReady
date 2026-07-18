@@ -4,7 +4,7 @@ Everything a person (or agent) needs to pick this project up. For *why* the code
 way it is, read `AGENTS.md` then `docs/ai/START_HERE.md`; this file is the operational state —
 what's shipped, what's pending, and how to move each piece forward.
 
-_Last updated: 2026-07-18, at version 0.4.4._
+_Last updated: 2026-07-19, at version 0.4.5._
 
 ---
 
@@ -13,10 +13,10 @@ _Last updated: 2026-07-18, at version 0.4.4._
 | Thing | State |
 |-------|-------|
 | **What it is** | Laydown — a desktop app for **PDF imposition** (laying source pages onto press sheets). Python + PyQt6 UI + PyMuPDF engine. |
-| **Current version** | **0.4.4** (`laydown/__init__.py` is the single source of truth) |
+| **Current version** | **0.4.5** (`laydown/__init__.py` is the single source of truth) |
 | **Repo** | <https://github.com/danielmevit/laydown> (default branch `main`; work on `dev`, merge to `main` on release) |
 | **Website** | <https://danielmevit.github.io/laydown/> — Astro, in `site/`, deploys from `main` |
-| **GitHub releases** | **0.4.4**, all platforms — Windows (MSIX + portable), macOS (arm64 + Intel), Linux x86_64 |
+| **GitHub releases** | **0.4.5**, all platforms — Windows (MSIX + portable), macOS (arm64 + Intel), Linux x86_64 |
 | **Microsoft Store** | **Submitted 2026-07-18, IN REVIEW.** Package version 0.4.1. See §3. |
 | **Tests** | 257, run headless anywhere (`pytest`). CI gates every release on them. |
 | **License** | AGPL-3.0-only |
@@ -78,7 +78,7 @@ a human reviews the `runFullTrust` justification.
   source, and Windows users get one-click install with **no certificate step**.
 - **If it asks a question** (most likely about runFullTrust): the justification in
   `docs/store/SUBMISSION.md` §8a is the standard, accepted answer — reply with that.
-- **The Store is behind GitHub** (Store = 0.4.1, GitHub = 0.4.4). This is fine — they're
+- **The Store is behind GitHub** (Store = 0.4.1, GitHub = 0.4.5). This is fine — they're
   independent channels. **After the 0.4.1 review clears, submit a Store update to catch up:**
   build the current version's Store package (§below) and upload it as a new submission. Don't
   update the package *while* the current one is in review, or review restarts.
@@ -164,7 +164,7 @@ pytest                         # 257 tests, no display needed
 ## 7. Open items / what's next
 
 - **Microsoft Store review** — waiting (§3). When it lands, react per §3.
-- **Store version catch-up** — after 0.4.1 approves, submit a 0.4.4+ Store update.
+- **Store version catch-up** — after 0.4.1 approves, submit a 0.4.5+ Store update.
 - **ROADMAP backlog** — Step & Repeat / Cut Stack layouts, a headless CLI (the engine is already
   Qt-free for it), more marks/units. Work-and-turn/tumble stays out until a pressman validates it.
 - **Signing** — the self-signed model means a one-time trust step per user on the GitHub MSIX. A

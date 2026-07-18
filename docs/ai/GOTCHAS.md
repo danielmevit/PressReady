@@ -88,6 +88,18 @@
   trust does not cover Laydown's cert either.
 - PyInstaller frozen mode resolves icons via `sys._MEIPASS` (`app_icon()` in
   `ui/main_window.py`) — test icon changes in a frozen build, not just from source.
+- **A "blank taskbar/Explorer icon" report on Windows is probably the machine's icon cache,
+  not the build.** 0.4.5 burned an evening on one: the `.ico` was valid, the exe's
+  `RT_GROUP_ICON` was embedded, the frozen app's `windowIcon()` was provably non-null at
+  runtime (traced with a temporary debug dump, commit fafcf89) and PowerShell's
+  `[System.Drawing.Icon]::ExtractAssociatedIcon()` pulled the correct orange logo out of the
+  very exe showing blank — yet Explorer, the title bar and the taskbar all drew generic. The
+  shell's `IconCache.db` / `iconcache_*.db` were weeks stale; `ie4uinit.exe -show` fixed it on
+  the spot. Diagnose in that order before touching code, and remember a *fresh extract folder
+  does not bypass the cache*. Two real (if latent) weaknesses did surface and stay fixed: the
+  portable claimed the MSIX's AppUserModelID (blanks the button when the MSIX is installed,
+  now `DanielMevit.Laydown` and only when unpackaged), and `app_icon()` returned an empty
+  icon if its single root missed (now multi-root with an `.ico` fallback, pinned by a test).
 - The site lives in `site/` (Astro) and deploys **from `main`**, not `dev`.
 
 ## Qt traps

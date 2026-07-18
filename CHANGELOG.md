@@ -4,16 +4,19 @@ All notable changes to Laydown (formerly PressReady) are documented here.
 
 ---
 
-## [0.4.5] — 2026-07-18
+## [0.4.5] — 2026-07-19
 
-- **Fixed: the Windows taskbar icon was blank on the portable build.** The unpackaged build
-  claimed the *MSIX package's* identity (`LaydownTeam.Laydown`) as its taskbar AppUserModelID.
-  On a machine that also had the MSIX installed, Windows tried to resolve the portable's taskbar
-  icon *through that package* — which the portable isn't running inside — and drew an empty
-  button. The unpackaged build now claims its own identity (`DanielMevit.Laydown`) and only when
-  it detects it is *not* running inside a package, so a real MSIX run keeps the identity Windows
-  gives it. As a backstop, the icon loader now tries several bundle roots and falls back to the
-  multi-size `.ico`, so the window icon can never come back empty (pinned by a test).
+- **Windows taskbar-icon hardening.** A blank-taskbar-icon report led here; the reported blank
+  itself turned out to be a stale Windows *icon cache* on the machine (every layer of the build
+  proved correct — see `docs/ai/GOTCHAS.md`), but the investigation surfaced two real weaknesses,
+  both fixed. The unpackaged build (portable ZIP) no longer claims the *MSIX package's* identity
+  (`LaydownTeam.Laydown`) as its taskbar AppUserModelID — on a machine that also has the MSIX
+  installed, Windows would resolve the portable's taskbar icon through that package, which the
+  portable isn't running inside, and draw an empty button. It now claims its own identity
+  (`DanielMevit.Laydown`), and only when it detects it is *not* running inside a package, so a
+  real MSIX run keeps the identity Windows gives it. And the icon loader now tries several bundle
+  roots and falls back to the multi-size `.ico`, so the window icon can never come back empty
+  (pinned by a test).
 - **The four settings tabs (Source/Layout/Sheet/Marks) now fill the panel width**, each an equal
   quarter, instead of sitting as fixed-width buttons. Icons stay centred in every tab.
 - **Help ▸ About says more.** It now describes what Laydown does, credits **Daniel Mevit** with a
