@@ -63,15 +63,7 @@ const repo = "https://github.com/danielmevit/laydown";
         display: flex; align-items: center; gap: 0.6rem;
         font-weight: 700; color: var(--heading); text-decoration: none; font-size: 1.15rem;
       }
-      .brand .glyph {
-        width: 26px; height: 26px; border-radius: 5px;
-        background: linear-gradient(150deg, var(--accent-hi), #a8631c);
-        position: relative; flex: none;
-      }
-      .brand .glyph::after {
-        content: ""; position: absolute; inset: 6px 6px auto 6px; height: 2px;
-        background: rgba(255, 255, 255, 0.85); box-shadow: 0 5px 0 rgba(255,255,255,.55);
-      }
+      .brand img { width: 26px; height: 26px; border-radius: 6px; flex: none; }
       nav a.back { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
       nav a.back:hover { color: var(--heading); }
 
@@ -104,7 +96,7 @@ const repo = "https://github.com/danielmevit/laydown";
     <div class="wrap">
       <nav>
         <a class="brand" href={`${base}/`}>
-          <span class="glyph"></span> Laydown
+          <img src={`${base}/assets/icon_256.png`} alt="" width="26" height="26" /> Laydown
         </a>
         <a class="back" href={`${base}/`}>&larr; Back to Laydown</a>
       </nav>

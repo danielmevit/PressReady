@@ -12,6 +12,9 @@ on:
     paths:
       - "site/**"
       - ".github/workflows/deploy.yml"
+      # The site reads the version from here at build time; without this the page
+      # advertises whatever version was current at the last site/ edit.
+      - "laydown/__init__.py"
   workflow_dispatch:
 
 permissions:

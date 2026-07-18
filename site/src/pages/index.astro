@@ -173,15 +173,7 @@ const faqs = [
         display: flex; align-items: center; gap: 0.6rem;
         font-weight: 700; color: var(--heading); text-decoration: none; font-size: 1.15rem;
       }
-      .brand .glyph {
-        width: 26px; height: 26px; border-radius: 5px;
-        background: linear-gradient(150deg, var(--accent-hi), var(--accent-deep));
-        position: relative; flex: none;
-      }
-      .brand .glyph::after {
-        content: ""; position: absolute; inset: 6px 6px auto 6px; height: 2px;
-        background: rgba(255, 255, 255, 0.85); box-shadow: 0 5px 0 rgba(255,255,255,.55);
-      }
+      .brand img { width: 26px; height: 26px; border-radius: 6px; flex: none; }
       nav .links { display: flex; align-items: center; gap: 1.3rem; }
       nav .links a {
         color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem;
@@ -299,7 +291,7 @@ const faqs = [
     <div class="wrap">
       <nav>
         <a class="brand" href={`${base}/`}>
-          <span class="glyph"></span> Laydown
+          <img src={`${base}/assets/icon_256.png`} alt="" width="26" height="26" /> Laydown
         </a>
         <div class="links">
           <a href="#features">Features</a>
@@ -335,18 +327,22 @@ const faqs = [
       </div>
     </header>
 
-    <section id="features" class="wrap">
-      <div class="section-head">
-        <h2>Built for work that goes to press</h2>
-        <p>The details that decide whether a job comes back right.</p>
-      </div>
-      <div class="grid">
-        {features.map((f) => (
-          <div class="card">
-            <h3>{f.title}</h3>
-            <p>{f.body}</p>
-          </div>
-        ))}
+    <!-- section + .wrap must stay on separate elements: .wrap's `padding: 0 1.5rem`
+         out-specifies section's vertical padding and glues the band to its neighbours. -->
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Built for work that goes to press</h2>
+          <p>The details that decide whether a job comes back right.</p>
+        </div>
+        <div class="grid">
+          {features.map((f) => (
+            <div class="card">
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 
@@ -365,37 +361,39 @@ const faqs = [
       </div>
     </section>
 
-    <section id="download" class="wrap">
-      <div class="section-head">
-        <h2>Download Laydown {version}</h2>
-        <p>Free, no account, no strings. Everything's included — no Python needed.</p>
+    <section id="download">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Download Laydown {version}</h2>
+          <p>Free, no account, no strings. Everything's included — no Python needed.</p>
+        </div>
+        <div class="dl-grid">
+          <div class="dl">
+            <h3>Windows</h3>
+            <p class="os">10 / 11 · 64-bit · installer or portable</p>
+            <a class="btn" href={latest}>Get the installer</a>
+            <p class="os" style="margin-top:.8rem">Portable ZIP also on the releases page</p>
+          </div>
+          <div class="dl">
+            <h3>macOS</h3>
+            <p class="os">11+ · Apple silicon &amp; Intel</p>
+            <a class="btn" href={latest}>Get the .dmg</a>
+            <p class="os" style="margin-top:.8rem">First launch: right-click → Open</p>
+          </div>
+          <div class="dl">
+            <h3>Linux</h3>
+            <p class="os">x86_64 · portable tar.gz</p>
+            <a class="btn" href={latest}>Get the tarball</a>
+            <p class="os" style="margin-top:.8rem">Extract and run — no install</p>
+          </div>
+        </div>
+        <p class="note">
+          The Windows and macOS builds aren't code-signed yet, so the first launch shows a
+          "publisher unknown" warning — on Windows that's <b>More info → Run anyway</b>.
+          Signing costs money and isn't there yet. You can always
+          <a href={repo}>read the source</a> or build it yourself.
+        </p>
       </div>
-      <div class="dl-grid">
-        <div class="dl">
-          <h3>Windows</h3>
-          <p class="os">10 / 11 · 64-bit · installer or portable</p>
-          <a class="btn" href={latest}>Get the installer</a>
-          <p class="os" style="margin-top:.8rem">Portable ZIP also on the releases page</p>
-        </div>
-        <div class="dl">
-          <h3>macOS</h3>
-          <p class="os">11+ · Apple silicon &amp; Intel</p>
-          <a class="btn" href={latest}>Get the .dmg</a>
-          <p class="os" style="margin-top:.8rem">First launch: right-click → Open</p>
-        </div>
-        <div class="dl">
-          <h3>Linux</h3>
-          <p class="os">x86_64 · portable tar.gz</p>
-          <a class="btn" href={latest}>Get the tarball</a>
-          <p class="os" style="margin-top:.8rem">Extract and run — no install</p>
-        </div>
-      </div>
-      <p class="note">
-        The Windows and macOS builds aren't code-signed yet, so the first launch shows a
-        "publisher unknown" warning — on Windows that's <b>More info → Run anyway</b>.
-        Signing costs money and isn't there yet. You can always
-        <a href={repo}>read the source</a> or build it yourself.
-      </p>
     </section>
 
     <section id="faq" style="background: var(--bg-soft); border-block: 1px solid var(--border);">
