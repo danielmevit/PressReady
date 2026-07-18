@@ -88,18 +88,29 @@
   trust does not cover Laydown's cert either.
 - PyInstaller frozen mode resolves icons via `sys._MEIPASS` (`app_icon()` in
   `ui/main_window.py`) — test icon changes in a frozen build, not just from source.
-- **A "blank taskbar/Explorer icon" report on Windows is probably the machine's icon cache,
-  not the build.** 0.4.5 burned an evening on one: the `.ico` was valid, the exe's
+- **A "blank taskbar/Explorer icon" report on Windows is probably the machine's shell state,
+  not the build.** 0.4.5 burned two evenings on one: the `.ico` was valid, the exe's
   `RT_GROUP_ICON` was embedded, the frozen app's `windowIcon()` was provably non-null at
-  runtime (traced with a temporary debug dump, commit fafcf89) and PowerShell's
-  `[System.Drawing.Icon]::ExtractAssociatedIcon()` pulled the correct orange logo out of the
-  very exe showing blank — yet Explorer, the title bar and the taskbar all drew generic. The
-  shell's `IconCache.db` / `iconcache_*.db` were weeks stale; `ie4uinit.exe -show` fixed it on
-  the spot. Diagnose in that order before touching code, and remember a *fresh extract folder
-  does not bypass the cache*. Two real (if latent) weaknesses did surface and stay fixed: the
+  runtime (traced with a temporary debug dump, commit fafcf89), PowerShell's
+  `ExtractAssociatedIcon`/`SHGetFileInfo` both pulled the correct logo from the very exe
+  reported blank, and `PrintWindow` captures showed Explorer and the title bar *drawing* it
+  correctly — yet the live taskbar had **no button at all** for the running window (UI
+  Automation enumeration proved it). The machine had a **pending Windows Update restart**;
+  after the restart the button appeared with the correct icon and the report closed. So:
+  clear the icon cache (`ie4uinit.exe -show`), check for a pending OS restart, and verify
+  with the probe toolkit below *before* touching code — a fresh extract folder does not
+  bypass any of this. Two real (if latent) weaknesses did surface and stay fixed: the
   portable claimed the MSIX's AppUserModelID (blanks the button when the MSIX is installed,
   now `DanielMevit.Laydown` and only when unpackaged), and `app_icon()` returned an empty
   icon if its single root missed (now multi-root with an `.ico` fallback, pinned by a test).
+  Probe toolkit (all runnable from WSL via `powershell.exe`, no user interaction):
+  `[System.Drawing.Icon]::ExtractAssociatedIcon()` (exe resource as GDI reads it),
+  `SHGetFileInfo` (the shell/cache path Explorer uses), `WM_GETICON` on the live window
+  (what the taskbar consumes), `PrintWindow` on `Shell_TrayWnd`/the app/an Explorer window
+  (what is actually *drawn*), and UI Automation over the tray for button-by-name proof.
+  Two traps in that tooling: `FindWindowW` P/Invoke needs `CharSet=Unicode` or it silently
+  matches nothing, and **processes launched through WSL interop die when the interop call
+  ends** — launch via `explorer.exe <path>` to detach them.
 - The site lives in `site/` (Astro) and deploys **from `main`**, not `dev`.
 
 ## Qt traps
